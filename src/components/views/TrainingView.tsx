@@ -129,14 +129,8 @@ export function TrainingView() {
                 setSelectedJob(response.data[0]);
             }
         } catch (err) {
-            // Demo data
-            const demoJobs: FineTuneJob[] = [
-                { id: 'ft-job-001', name: 'Medical LLaMA', status: 'running', progress: 67, createdAt: '2024-12-20T10:30:00Z', metrics: { trainingLoss: 0.342, validationLoss: 0.385 } },
-                { id: 'ft-job-002', name: 'Code Assistant', status: 'completed', progress: 100, createdAt: '2024-12-19T14:20:00Z', completedAt: '2024-12-19T18:45:00Z' },
-                { id: 'ft-job-003', name: 'Customer Support Bot', status: 'pending', progress: 0, createdAt: '2024-12-20T11:00:00Z' },
-            ];
-            setJobs(demoJobs);
-            if (!selectedJob) setSelectedJob(demoJobs[0]);
+            console.error('Failed to load jobs:', err);
+            setJobs([]);
         } finally {
             setIsLoading(false);
         }
@@ -234,24 +228,24 @@ export function TrainingView() {
                         <div className="metrics-grid">
                             <MetricTile
                                 label="Training Loss"
-                                value={(selectedJob.metrics?.trainingLoss as number)?.toFixed(3) || '0.342'}
-                                trend="-12%"
+                                value={(selectedJob.metrics?.trainingLoss as number)?.toFixed(3) || '-'}
+                                trend={selectedJob.metrics?.trainingLoss ? "-12%" : undefined}
                                 icon={<TrendingDown size={16} />}
                             />
                             <MetricTile
                                 label="Validation Loss"
-                                value={(selectedJob.metrics?.validationLoss as number)?.toFixed(3) || '0.385'}
-                                trend="-5%"
+                                value={(selectedJob.metrics?.validationLoss as number)?.toFixed(3) || '-'}
+                                trend={selectedJob.metrics?.validationLoss ? "-5%" : undefined}
                                 icon={<TrendingDown size={16} />}
                             />
                             <MetricTile
                                 label="Epoch"
-                                value="2/5"
+                                value={(selectedJob.metrics?.epoch as string) || '-'}
                                 icon={<Activity size={16} />}
                             />
                             <MetricTile
                                 label="GPU Utilization"
-                                value="92%"
+                                value={(selectedJob.metrics?.gpuUtilization as string) || '-'}
                                 icon={<Cpu size={16} />}
                             />
                         </div>
@@ -286,16 +280,7 @@ export function TrainingView() {
                             ) : (
                                 <div className="logs-container">
                                     <pre className="logs-output">
-                                        {`[2024-12-20 10:30:00] Starting fine-tuning job...
-[2024-12-20 10:30:05] Loading base model: llama-3-8b
-[2024-12-20 10:30:45] Model loaded successfully
-[2024-12-20 10:30:50] Loading dataset: pubmed_qa.jsonl
-[2024-12-20 10:31:00] Dataset loaded: 15,000 examples
-[2024-12-20 10:31:05] Initializing QLoRA adapter (r=64, alpha=16)
-[2024-12-20 10:31:10] Starting epoch 1/5...
-[2024-12-20 10:45:00] Epoch 1 complete. Loss: 0.523
-[2024-12-20 10:45:05] Starting epoch 2/5...
-[2024-12-20 10:58:30] Epoch 2 progress: 67% | Loss: 0.342`}
+                                        {(selectedJob.metrics?.logs as string) || 'No logs available yet...'}
                                     </pre>
                                 </div>
                             )}

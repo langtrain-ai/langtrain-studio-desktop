@@ -113,13 +113,8 @@ export function DatasetsView() {
             const response = await apiClient.listDatasets('default');
             setDatasets(response.data);
         } catch (err) {
-            console.warn('API Error:', err instanceof Error ? err.message : 'Failed to load datasets');
-            // Demo data for development
-            setDatasets([
-                { id: 'ds-1234567890ab', filename: 'pubmed_qa.jsonl', purpose: 'fine-tune', bytes: 15728640, createdAt: '2024-12-20T10:30:00Z' },
-                { id: 'ds-234567890abc', filename: 'medical_conversations.jsonl', purpose: 'fine-tune', bytes: 8388608, createdAt: '2024-12-19T14:20:00Z' },
-                { id: 'ds-34567890abcd', filename: 'clinical_notes.jsonl', purpose: 'fine-tune', bytes: 4194304, createdAt: '2024-12-18T09:15:00Z' },
-            ]);
+            console.error('Failed to load datasets:', err instanceof Error ? err.message : 'Unknown error');
+            setDatasets([]);
         } finally {
             setIsLoading(false);
         }

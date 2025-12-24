@@ -28,6 +28,8 @@ interface TOTPLoginResponse {
     redirectUrl: string;
     accessToken?: string;
     refreshToken?: string;
+    userId?: string;
+    email?: string;
 }
 
 // Auth Error types
@@ -207,9 +209,9 @@ class AuthManager {
                     isAuthenticated: true,
                     isLoading: false,
                     user: {
-                        id: '',
-                        email,
-                        name: email.split('@')[0],
+                        id: data.userId || '',
+                        email: data.email || email,
+                        name: (data.email || email).split('@')[0],
                     },
                 });
                 // Fetch full profile in background

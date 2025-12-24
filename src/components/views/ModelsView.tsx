@@ -131,15 +131,7 @@ export function ModelsView() {
             setModels(response.data);
         } catch (err) {
             console.error('Failed to load models:', err);
-            // Demo data for development
-            setModels([
-                { id: 'llama-3-8b', name: 'Llama 3 8B', description: 'Meta\'s latest Llama 3 model with 8 billion parameters. Great for general-purpose fine-tuning.', parameters: 8e9, contextLength: 8192, supportsFinetuning: true, sizeBytes: 16e9 },
-                { id: 'llama-3-70b', name: 'Llama 3 70B', description: 'Large-scale Llama 3 model with 70 billion parameters. Best for complex reasoning tasks.', parameters: 70e9, contextLength: 8192, supportsFinetuning: true, sizeBytes: 140e9 },
-                { id: 'mistral-7b', name: 'Mistral 7B', description: 'Efficient 7B model from Mistral AI. Excellent performance-to-size ratio.', parameters: 7e9, contextLength: 32768, supportsFinetuning: true, sizeBytes: 14e9 },
-                { id: 'phi-3-mini', name: 'Phi-3 Mini', description: 'Microsoft\'s compact but powerful Phi-3 Mini model.', parameters: 3.8e9, contextLength: 4096, supportsFinetuning: true, sizeBytes: 7.6e9 },
-                { id: 'gemma-7b', name: 'Gemma 7B', description: 'Google\'s open model based on Gemini technology.', parameters: 7e9, contextLength: 8192, supportsFinetuning: true, sizeBytes: 14e9 },
-                { id: 'qwen-7b', name: 'Qwen 7B', description: 'Alibaba\'s Qwen model with strong multilingual support.', parameters: 7e9, contextLength: 8192, supportsFinetuning: true, sizeBytes: 14e9 },
-            ]);
+            setModels([]);
         } finally {
             setIsLoading(false);
         }
