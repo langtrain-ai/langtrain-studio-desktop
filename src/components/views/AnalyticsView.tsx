@@ -1,9 +1,9 @@
 /**
  * Analytics View Component
- * View training metrics and insights
+ * View training metrics and insights from real API data
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     BarChart3,
     TrendingDown,
@@ -13,8 +13,10 @@ import {
     Activity,
     PieChart,
     ArrowUpRight,
-    ArrowDownRight
+    ArrowDownRight,
+    Loader
 } from 'lucide-react';
+import { apiClient, UsageResponse, FineTuneJob } from '../../services/api';
 import './AnalyticsView.css';
 
 interface StatCardProps {
@@ -44,9 +46,12 @@ function StatCard({ title, value, change, changeType = 'neutral', icon }: StatCa
     );
 }
 
-function BarChartViz() {
-    const data = [65, 78, 52, 88, 92, 75, 85, 68, 95, 82, 70, 88];
-    const maxValue = Math.max(...data);
+interface BarChartVizProps {
+    data: number[];
+}
+
+function BarChartViz({ data }: BarChartVizProps) {
+    const maxValue = Math.max(...data, 1);
 
     return (
         <div className="bar-chart">
@@ -65,71 +70,19 @@ function BarChartViz() {
     );
 }
 
-function LineChartViz() {
-    const points = [
-        { x: 0, y: 80 },
-        { x: 1, y: 65 },
-        { x: 2, y: 72 },
-        { x: 3, y: 58 },
-        { x: 4, y: 45 },
-        { x: 5, y: 52 },
-        { x: 6, y: 38 },
-        { x: 7, y: 42 },
-        { x: 8, y: 35 },
-        { x: 9, y: 28 },
-    ];
-
-    const width = 400;
-    const height = 150;
-    const padding = 20;
-
-    const xScale = (x: number) => (x / 9) * (width - padding * 2) + padding;
-    const yScale = (y: number) => height - padding - (y / 100) * (height - padding * 2);
-
-    const pathData = points
-        .map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(p.x)} ${yScale(p.y)}`)
-        .join(' ');
-
-    return (
-        <svg className="line-chart" viewBox={`0 0 ${width} ${height}`}>
-            <defs>
-                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="var(--accent-cyan)" />
-                    <stop offset="100%" stopColor="var(--accent-blue)" />
-                </linearGradient>
-            </defs>
-            <path
-                d={pathData}
-                fill="none"
-                stroke="url(#lineGradient)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-            {points.map((p, i) => (
-                <circle
-                    key={i}
-                    cx={xScale(p.x)}
-                    cy={yScale(p.y)}
-                    r="4"
-                    fill="var(--bg-primary)"
-                    stroke="var(--accent-cyan)"
-                    strokeWidth="2"
-                />
-            ))}
-        </svg>
-    );
+interface DonutChartProps {
+    data: { label: string; value: number; color: string }[];
 }
 
-function DonutChart() {
-    const data = [
-        { label: 'Completed', value: 65, color: 'var(--accent-green)' },
-        { label: 'Running', value: 20, color: 'var(--accent-cyan)' },
-        { label: 'Failed', value: 10, color: 'var(--accent-red)' },
-        { label: 'Pending', value: 5, color: 'var(--accent-orange)' },
-    ];
-
+function DonutChart({ data }: DonutChartProps) {
     const total = data.reduce((acc, d) => acc + d.value, 0);
+    if (total === 0) {
+        return (
+            <div className="donut-chart-container">
+                <div className="chart-empty">No data available</div>
+            </div>
+        );
+    }
     let currentAngle = -90;
 
     return (
@@ -162,7 +115,7 @@ function DonutChart() {
                     <div key={index} className="legend-item">
                         <span className="legend-dot" style={{ backgroundColor: item.color }} />
                         <span className="legend-label">{item.label}</span>
-                        <span className="legend-value">{item.value}%</span>
+                        <span className="legend-value">{item.value}</span>
                     </div>
                 ))}
             </div>
@@ -172,6 +125,61 @@ function DonutChart() {
 
 export function AnalyticsView() {
     const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
+    const [isLoading, setIsLoading] = useState(true);
+    const [usage, setUsage] = useState<UsageResponse | null>(null);
+    const [jobs, setJobs] = useState<FineTuneJob[]>([]);
+
+    useEffect(() => {
+        loadAnalytics();
+    }, [timeRange]);
+
+    async function loadAnalytics() {
+        try {
+            setIsLoading(true);
+            const [usageData, jobsData] = await Promise.all([
+                apiClient.getUsage('default'),
+                apiClient.listFineTuningJobs(),
+            ]);
+            setUsage(usageData);
+            setJobs(jobsData.data);
+        } catch (err) {
+            console.error('Failed to load analytics:', err);
+            setUsage(null);
+            setJobs([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    // Calculate job status distribution
+    const jobStatusData = [
+        { label: 'Completed', value: jobs.filter(j => ['completed', 'succeeded'].includes(j.status.toLowerCase())).length, color: 'var(--accent-green)' },
+        { label: 'Running', value: jobs.filter(j => ['running', 'in_progress'].includes(j.status.toLowerCase())).length, color: 'var(--accent-cyan)' },
+        { label: 'Failed', value: jobs.filter(j => ['failed', 'error'].includes(j.status.toLowerCase())).length, color: 'var(--accent-red)' },
+        { label: 'Pending', value: jobs.filter(j => ['pending', 'queued'].includes(j.status.toLowerCase())).length, color: 'var(--accent-orange)' },
+    ];
+
+    // Calculate success rate
+    const completedCount = jobStatusData[0].value;
+    const failedCount = jobStatusData[2].value;
+    const totalFinished = completedCount + failedCount;
+    const successRate = totalFinished > 0 ? ((completedCount / totalFinished) * 100).toFixed(1) : '-';
+
+    // Monthly job data (from actual jobs)
+    const monthlyData = Array(12).fill(0);
+    jobs.forEach(job => {
+        const month = new Date(job.createdAt).getMonth();
+        monthlyData[month]++;
+    });
+
+    if (isLoading) {
+        return (
+            <div className="analytics-view analytics-view--loading">
+                <Loader size={32} className="spin" />
+                <span>Loading analytics...</span>
+            </div>
+        );
+    }
 
     return (
         <div className="analytics-view">
@@ -209,30 +217,23 @@ export function AnalyticsView() {
             <div className="analytics-view__stats">
                 <StatCard
                     title="Total Jobs"
-                    value="127"
-                    change="+18%"
-                    changeType="positive"
+                    value={jobs.length.toString()}
                     icon={<Activity size={20} />}
                 />
                 <StatCard
                     title="Success Rate"
-                    value="94.2%"
-                    change="+2.5%"
-                    changeType="positive"
+                    value={successRate !== '-' ? `${successRate}%` : '-'}
+                    changeType={Number(successRate) > 80 ? 'positive' : 'neutral'}
                     icon={<Target size={20} />}
                 />
                 <StatCard
-                    title="Avg. Training Time"
-                    value="2h 34m"
-                    change="-12%"
-                    changeType="positive"
+                    title="Fine-tune Jobs Used"
+                    value={usage ? `${usage.finetuneJobs.used}/${usage.finetuneJobs.limit}` : '-'}
                     icon={<Clock size={20} />}
                 />
                 <StatCard
-                    title="GPU Hours Used"
-                    value="847"
-                    change="+23%"
-                    changeType="neutral"
+                    title="Tokens Used"
+                    value={usage ? usage.tokens.used.toLocaleString() : '-'}
                     icon={<Zap size={20} />}
                 />
             </div>
@@ -249,7 +250,7 @@ export function AnalyticsView() {
                         <span className="chart-card__subtitle">Jobs started per month</span>
                     </div>
                     <div className="chart-card__content">
-                        <BarChartViz />
+                        <BarChartViz data={monthlyData} />
                     </div>
                 </div>
 
@@ -263,23 +264,62 @@ export function AnalyticsView() {
                         <span className="chart-card__subtitle">Distribution by status</span>
                     </div>
                     <div className="chart-card__content">
-                        <DonutChart />
+                        <DonutChart data={jobStatusData} />
                     </div>
                 </div>
             </div>
 
-            {/* Loss Curve */}
+            {/* Usage Info */}
             <div className="analytics-view__bottom">
                 <div className="chart-card chart-card--full">
                     <div className="chart-card__header">
                         <div className="chart-card__title">
                             <TrendingDown size={16} />
-                            <span>Average Training Loss</span>
+                            <span>Usage Summary</span>
                         </div>
-                        <span className="chart-card__subtitle">Across all completed jobs</span>
+                        <span className="chart-card__subtitle">
+                            {usage?.period.start ? `Since ${new Date(usage.period.start).toLocaleDateString()}` : 'Current period'}
+                        </span>
                     </div>
                     <div className="chart-card__content">
-                        <LineChartViz />
+                        {usage ? (
+                            <div className="usage-grid">
+                                <div className="usage-item">
+                                    <span className="usage-item__label">Tokens</span>
+                                    <div className="usage-item__bar">
+                                        <div
+                                            className="usage-item__fill"
+                                            style={{ width: `${usage.tokens.percentage}%` }}
+                                        />
+                                    </div>
+                                    <span className="usage-item__value">{usage.tokens.percentage}%</span>
+                                </div>
+                                <div className="usage-item">
+                                    <span className="usage-item__label">Fine-tune Jobs</span>
+                                    <div className="usage-item__bar">
+                                        <div
+                                            className="usage-item__fill"
+                                            style={{ width: `${usage.finetuneJobs.percentage}%` }}
+                                        />
+                                    </div>
+                                    <span className="usage-item__value">{usage.finetuneJobs.percentage}%</span>
+                                </div>
+                                <div className="usage-item">
+                                    <span className="usage-item__label">Agent Runs</span>
+                                    <div className="usage-item__bar">
+                                        <div
+                                            className="usage-item__fill"
+                                            style={{ width: `${usage.agentRuns.percentage}%` }}
+                                        />
+                                    </div>
+                                    <span className="usage-item__value">{usage.agentRuns.percentage}%</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="chart-empty">
+                                <span>Usage data not available. Please log in to view your usage.</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

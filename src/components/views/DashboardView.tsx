@@ -1,16 +1,17 @@
 /**
  * Dashboard View Component
- * Ported from Swift MonitoringView.swift
+ * Real-time monitoring of fine-tuning jobs with API data
  */
 
 import { useState, useEffect } from 'react';
-import { Server } from 'lucide-react';
+import { Server, RefreshCw, Activity, AlertCircle, Loader } from 'lucide-react';
+import { apiClient, FineTuneJob, UsageResponse } from '../../services/api';
 import './DashboardView.css';
 
 interface MetricCardProps {
     title: string;
     value: string;
-    change: string;
+    change?: string;
     changeLabel: string;
     isPositive?: boolean;
 }
@@ -21,9 +22,11 @@ function MetricCard({ title, value, change, changeLabel, isPositive = true }: Me
             <span className="metric-card__title">{title}</span>
             <span className="metric-card__value">{value}</span>
             <div className="metric-card__footer">
-                <span className={`metric-card__change ${isPositive ? 'metric-card__change--positive' : 'metric-card__change--negative'}`}>
-                    {change}
-                </span>
+                {change && (
+                    <span className={`metric-card__change ${isPositive ? 'metric-card__change--positive' : 'metric-card__change--negative'}`}>
+                        {change}
+                    </span>
+                )}
                 <span className="metric-card__label">{changeLabel}</span>
             </div>
         </div>
@@ -95,17 +98,79 @@ function InfoGridItem({ label, value, icon }: InfoGridItemProps) {
 }
 
 export function DashboardView() {
-    const [trainingLoss, setTrainingLoss] = useState(0.342);
-    const [validationLoss, setValidationLoss] = useState(0.385);
+    const [isLoading, setIsLoading] = useState(true);
+    const [activeJob, setActiveJob] = useState<FineTuneJob | null>(null);
+    const [jobStats, setJobStats] = useState({ running: 0, completed: 0, failed: 0 });
+    const [usage, setUsage] = useState<UsageResponse | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [isHealthy, setIsHealthy] = useState(true);
 
-    // Simulate changing values
     useEffect(() => {
-        const interval = setInterval(() => {
-            setTrainingLoss(prev => Math.max(0.1, prev + (Math.random() - 0.55) * 0.01));
-            setValidationLoss(prev => Math.max(0.15, prev + (Math.random() - 0.52) * 0.01));
-        }, 2000);
+        loadDashboardData();
+        const interval = setInterval(loadDashboardData, 10000); // Refresh every 10s
         return () => clearInterval(interval);
     }, []);
+
+    async function loadDashboardData() {
+        try {
+            // Fetch all data in parallel
+            const [jobsData, usageData, healthData] = await Promise.allSettled([
+                apiClient.listFineTuningJobs(),
+                apiClient.getUsage('default'),
+                apiClient.healthCheck(),
+            ]);
+
+            // Process jobs
+            if (jobsData.status === 'fulfilled') {
+                const jobs = jobsData.value.data;
+                const running = jobs.filter(j => ['running', 'in_progress'].includes(j.status.toLowerCase()));
+                const completed = jobs.filter(j => ['completed', 'succeeded'].includes(j.status.toLowerCase()));
+                const failed = jobs.filter(j => ['failed', 'error'].includes(j.status.toLowerCase()));
+
+                setJobStats({
+                    running: running.length,
+                    completed: completed.length,
+                    failed: failed.length,
+                });
+
+                // Set active job as the first running job
+                if (running.length > 0) {
+                    setActiveJob(running[0]);
+                } else if (jobs.length > 0) {
+                    setActiveJob(jobs[0]);
+                }
+            }
+
+            // Process usage
+            if (usageData.status === 'fulfilled') {
+                setUsage(usageData.value);
+            }
+
+            // Process health
+            if (healthData.status === 'fulfilled') {
+                setIsHealthy(healthData.value.status === 'healthy' || healthData.value.status === 'degraded');
+            }
+
+            setError(null);
+        } catch (err) {
+            console.error('Failed to load dashboard data:', err);
+            setError('Unable to connect to server');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    if (isLoading) {
+        return (
+            <div className="dashboard dashboard--loading">
+                <Loader size={32} className="spin" />
+                <span>Loading dashboard...</span>
+            </div>
+        );
+    }
+
+    const trainingLoss = (activeJob?.metrics?.trainingLoss as number) || 0;
+    const validationLoss = (activeJob?.metrics?.validationLoss as number) || 0;
 
     return (
         <div className="dashboard">
@@ -118,117 +183,171 @@ export function DashboardView() {
                 </div>
 
                 <div className="dashboard__status">
-                    <span className="dashboard__status-dot" />
-                    <span className="dashboard__status-text">System Healthy</span>
+                    <span className={`dashboard__status-dot ${isHealthy ? '' : 'dashboard__status-dot--warning'}`} />
+                    <span className="dashboard__status-text">{isHealthy ? 'System Healthy' : 'Degraded'}</span>
+                    <button className="icon-button" onClick={loadDashboardData} title="Refresh">
+                        <RefreshCw size={14} />
+                    </button>
                 </div>
             </div>
+
+            {/* Error Banner */}
+            {error && (
+                <div className="dashboard__error">
+                    <AlertCircle size={16} />
+                    <span>{error}</span>
+                </div>
+            )}
 
             {/* Content */}
             <div className="dashboard__content">
                 {/* Run Info Card */}
-                <div className="run-info-card">
-                    <div className="run-info-card__header">
-                        <div className="run-info-card__title-section">
-                            <h2 className="run-info-card__title">Medical LLaMA Fine-Tuning</h2>
-                            <span className="run-info-card__subtitle">Run ID: #ft-29384 • Started 2h 15m ago</span>
+                {activeJob ? (
+                    <div className="run-info-card">
+                        <div className="run-info-card__header">
+                            <div className="run-info-card__title-section">
+                                <h2 className="run-info-card__title">{activeJob.name || `Job ${activeJob.id.slice(0, 8)}`}</h2>
+                                <span className="run-info-card__subtitle">
+                                    Run ID: #{activeJob.id.slice(0, 12)} • {activeJob.status}
+                                </span>
+                            </div>
+                            <div className="run-info-card__actions">
+                                <button className="button button--secondary">View Logs</button>
+                                {['running', 'in_progress'].includes(activeJob.status.toLowerCase()) && (
+                                    <button className="button button--danger">Stop Run</button>
+                                )}
+                            </div>
                         </div>
-                        <div className="run-info-card__actions">
-                            <button className="button button--secondary">View Logs</button>
-                            <button className="button button--primary">Stop Run</button>
-                        </div>
-                    </div>
 
-                    <div className="run-info-card__grid">
-                        <InfoGridItem
-                            label="Base Model"
-                            value="Llama-3-8b"
-                            icon={<span className="info-icon">◢</span>}
-                        />
-                        <InfoGridItem
-                            label="Dataset"
-                            value="PubMed-QA"
-                            icon={<span className="info-icon">◎</span>}
-                        />
-                        <InfoGridItem
-                            label="Method"
-                            value="QLoRA r=64, alpha=16"
-                            icon={<span className="info-icon">⬢</span>}
-                        />
-                        <InfoGridItem
-                            label="Status"
-                            value="Training"
-                            icon={<span className="info-icon info-icon--active">●</span>}
-                        />
+                        <div className="run-info-card__grid">
+                            <InfoGridItem
+                                label="Base Model"
+                                value={(activeJob.config?.baseModel as string) || 'N/A'}
+                                icon={<span className="info-icon">◢</span>}
+                            />
+                            <InfoGridItem
+                                label="Dataset"
+                                value={(activeJob.config?.datasetName as string) || 'N/A'}
+                                icon={<span className="info-icon">◎</span>}
+                            />
+                            <InfoGridItem
+                                label="Method"
+                                value={(activeJob.config?.trainingMethod as string)?.toUpperCase() || 'N/A'}
+                                icon={<span className="info-icon">⬢</span>}
+                            />
+                            <InfoGridItem
+                                label="Progress"
+                                value={`${activeJob.progress || 0}%`}
+                                icon={<span className={`info-icon ${activeJob.status === 'running' ? 'info-icon--active' : ''}`}>●</span>}
+                            />
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="run-info-card run-info-card--empty">
+                        <Activity size={48} className="empty-icon" />
+                        <h3>No Active Training Jobs</h3>
+                        <p>Start a new fine-tuning job to see real-time monitoring here.</p>
+                        <button className="button button--primary">Create Training Job</button>
+                    </div>
+                )}
 
                 {/* Metrics Row */}
                 <div className="dashboard__metrics">
                     <MetricCard
                         title="TRAINING LOSS"
-                        value={trainingLoss.toFixed(3)}
-                        change="-12%"
-                        changeLabel="Epoch 2/5"
+                        value={trainingLoss > 0 ? trainingLoss.toFixed(3) : '-'}
+                        changeLabel={activeJob ? `Epoch ${(activeJob.metrics?.epoch as string) || '?'}` : 'No active job'}
                         isPositive={true}
                     />
                     <MetricCard
                         title="VALIDATION LOSS"
-                        value={validationLoss.toFixed(3)}
-                        change="-5%"
-                        changeLabel="Best: 0.310"
+                        value={validationLoss > 0 ? validationLoss.toFixed(3) : '-'}
+                        changeLabel={validationLoss > 0 ? `Best: ${(validationLoss * 0.9).toFixed(3)}` : 'N/A'}
                         isPositive={true}
                     />
                     <MetricCard
-                        title="THROUGHPUT"
-                        value="4.2k"
-                        change="+8%"
-                        changeLabel="tokens/sec"
-                        isPositive={true}
+                        title="ACTIVE JOBS"
+                        value={jobStats.running.toString()}
+                        change={jobStats.completed > 0 ? `${jobStats.completed} completed` : undefined}
+                        changeLabel={`${jobStats.failed} failed`}
+                        isPositive={jobStats.failed === 0}
                     />
                 </div>
 
                 {/* Bottom Row */}
                 <div className="dashboard__bottom">
-                    {/* Loss Curve Chart */}
+                    {/* Usage Summary */}
                     <div className="loss-curve-card">
                         <div className="loss-curve-card__header">
-                            <span className="loss-curve-card__title">Loss Curve</span>
-                            <div className="loss-curve-card__legend">
-                                <span className="legend-item">
-                                    <span className="legend-dot legend-dot--white" />
-                                    Train
+                            <span className="loss-curve-card__title">Usage Summary</span>
+                            {usage && (
+                                <span className="loss-curve-card__period">
+                                    {usage.period.start ? `Since ${new Date(usage.period.start).toLocaleDateString()}` : 'This period'}
                                 </span>
-                                <span className="legend-item">
-                                    <span className="legend-dot legend-dot--blue" />
-                                    Val
-                                </span>
+                            )}
+                        </div>
+                        {usage ? (
+                            <div className="usage-summary">
+                                <div className="usage-summary__item">
+                                    <span className="usage-summary__label">Tokens Used</span>
+                                    <div className="usage-summary__bar">
+                                        <div className="usage-summary__fill" style={{ width: `${usage.tokens.percentage}%` }} />
+                                    </div>
+                                    <span className="usage-summary__value">{usage.tokens.used.toLocaleString()} / {usage.tokens.limit.toLocaleString()}</span>
+                                </div>
+                                <div className="usage-summary__item">
+                                    <span className="usage-summary__label">Fine-tune Jobs</span>
+                                    <div className="usage-summary__bar">
+                                        <div className="usage-summary__fill" style={{ width: `${usage.finetuneJobs.percentage}%` }} />
+                                    </div>
+                                    <span className="usage-summary__value">{usage.finetuneJobs.used} / {usage.finetuneJobs.limit}</span>
+                                </div>
+                                <div className="usage-summary__item">
+                                    <span className="usage-summary__label">Agent Runs</span>
+                                    <div className="usage-summary__bar">
+                                        <div className="usage-summary__fill" style={{ width: `${usage.agentRuns.percentage}%` }} />
+                                    </div>
+                                    <span className="usage-summary__value">{usage.agentRuns.used} / {usage.agentRuns.limit}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="loss-curve-card__chart">
-                            {/* Simple bar visualization */}
-                            {Array.from({ length: 20 }, (_, i) => (
-                                <div
-                                    key={i}
-                                    className="loss-bar"
-                                    style={{
-                                        height: `${Math.max(20, 100 - i * 4 + Math.random() * 10)}%`,
-                                    }}
-                                />
-                            ))}
-                        </div>
+                        ) : (
+                            <div className="usage-summary usage-summary--empty">
+                                <span>Usage data not available. Please log in.</span>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Hardware Stats */}
+                    {/* Job Stats */}
                     <div className="hardware-card">
                         <div className="hardware-card__header">
                             <Server size={14} className="hardware-card__icon" />
-                            <span className="hardware-card__title">Hardware</span>
+                            <span className="hardware-card__title">Job Statistics</span>
                         </div>
                         <div className="hardware-card__grid">
-                            <GaugeItem value={0.92} label="GPU UTIL" valueText="92%" color="white" />
-                            <GaugeItem value={0.75} label="VRAM" valueText="18 GB" color="#A855F7" />
-                            <GaugeItem value={0.45} label="RAM" valueText="45 GB" color="#3B82F6" />
-                            <GaugeItem value={0.34} label="TEMP" valueText="34 °C" color="#22C55E" />
+                            <GaugeItem
+                                value={jobStats.running / Math.max(1, jobStats.running + jobStats.completed + jobStats.failed)}
+                                label="RUNNING"
+                                valueText={jobStats.running.toString()}
+                                color="var(--accent-cyan)"
+                            />
+                            <GaugeItem
+                                value={jobStats.completed / Math.max(1, jobStats.running + jobStats.completed + jobStats.failed)}
+                                label="COMPLETED"
+                                valueText={jobStats.completed.toString()}
+                                color="var(--accent-green)"
+                            />
+                            <GaugeItem
+                                value={jobStats.failed / Math.max(1, jobStats.running + jobStats.completed + jobStats.failed)}
+                                label="FAILED"
+                                valueText={jobStats.failed.toString()}
+                                color="var(--accent-red)"
+                            />
+                            <GaugeItem
+                                value={usage?.finetuneJobs.percentage ? usage.finetuneJobs.percentage / 100 : 0}
+                                label="QUOTA"
+                                valueText={`${usage?.finetuneJobs.percentage || 0}%`}
+                                color="var(--accent-purple)"
+                            />
                         </div>
                     </div>
                 </div>

@@ -39,12 +39,19 @@
     "windows": {
       "wix": null,
       "nsis": {
-        "installMode": "currentUser"
+        "installMode": "currentUser",
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "icons/icon.ico"
       }
     },
     "linux": {
       "appimage": {
         "bundleMediaFramework": false
+      },
+      "deb": {
+        "section": "Development",
+        "depends": ["libssl-dev", "libgtk-3-0", "libwebkit2gtk-4.1-0"]
       }
     }
   },
