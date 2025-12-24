@@ -14,6 +14,7 @@ import {
     Settings,
     Users,
     BookOpen,
+    LogOut,
     type LucideIcon,
 } from 'lucide-react';
 import { sidebarItems, systemItems } from '../../lib/theme';
@@ -56,7 +57,7 @@ function SidebarItem({ title, icon, path }: SidebarItemProps) {
 }
 
 export function Sidebar() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
 
     return (
         <aside className="sidebar">
@@ -97,7 +98,7 @@ export function Sidebar() {
                 </div>
             </nav>
 
-            {/* Footer - User Info */}
+            {/* Footer - User Info & Logout */}
             <div className="sidebar__footer">
                 <div className="sidebar__user">
                     <div className="sidebar__user-avatar">
@@ -110,6 +111,14 @@ export function Sidebar() {
                         </span>
                     </div>
                 </div>
+
+                <button
+                    className="sidebar-logout"
+                    onClick={logout}
+                    title="Sign Out"
+                >
+                    <LogOut size={16} />
+                </button>
             </div>
         </aside>
     );

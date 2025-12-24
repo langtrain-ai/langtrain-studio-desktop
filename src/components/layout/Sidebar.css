@@ -150,3 +150,28 @@
     font-size: 11px;
     color: var(--text-tertiary);
 }
+
+.sidebar__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.sidebar-logout:hover {
+    color: var(--text-danger);
+    background-color: rgba(239, 68, 68, 0.1);
+}

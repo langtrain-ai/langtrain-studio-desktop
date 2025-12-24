@@ -270,6 +270,8 @@ class AuthManager {
 
     logout(): void {
         this.clearTokens();
+        localStorage.clear();
+        sessionStorage.clear();
         this.setState({
             isAuthenticated: false,
             user: null,
