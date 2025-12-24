@@ -1,0 +1,381 @@
+/**
+ * Dashboard View Styles
+ * Ported from Swift MonitoringView.swift
+ */
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--bg-primary);
+}
+
+/* Header */
+.dashboard__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+}
+
+.dashboard__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.dashboard__breadcrumb-item {
+    font-size: var(--text-base);
+    color: var(--text-tertiary);
+}
+
+.dashboard__breadcrumb-sep {
+    color: var(--text-tertiary);
+}
+
+.dashboard__breadcrumb-current {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+}
+
+.dashboard__status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: rgba(34, 197, 94, 0.1);
+    border-radius: var(--radius-full);
+}
+
+.dashboard__status-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent-green);
+    border-radius: 50%;
+}
+
+.dashboard__status-text {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--accent-green);
+}
+
+/* Content */
+.dashboard__content {
+    flex: 1;
+    padding: 0 var(--space-lg) var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    overflow-y: auto;
+}
+
+/* Run Info Card */
+.run-info-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+}
+
+.run-info-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-md);
+}
+
+.run-info-card__title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.run-info-card__title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.run-info-card__subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.run-info-card__actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.run-info-card__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+}
+
+/* Info Grid Item */
+.info-grid-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-md);
+}
+
+.info-grid-item__label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.info-grid-item__value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.info-icon {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.info-icon--active {
+    color: var(--text-primary);
+}
+
+/* Button */
+.button {
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.button--primary {
+    background-color: white;
+    color: black;
+}
+
+.button--primary:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.button--secondary {
+    background-color: var(--border-color);
+    color: white;
+}
+
+.button--secondary:hover {
+    background-color: var(--bg-elevated);
+}
+
+/* Metrics Row */
+.dashboard__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+}
+
+/* Metric Card */
+.metric-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+}
+
+.metric-card__title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-sm);
+}
+
+.metric-card__value {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.metric-card__footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.metric-card__change {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+}
+
+.metric-card__change--positive {
+    background-color: rgba(34, 197, 94, 0.15);
+    color: var(--accent-green);
+}
+
+.metric-card__change--negative {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--accent-red);
+}
+
+.metric-card__label {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+/* Bottom Row */
+.dashboard__bottom {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-md);
+    flex: 1;
+    min-height: 0;
+}
+
+/* Loss Curve Card */
+.loss-curve-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+}
+
+.loss-curve-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.loss-curve-card__title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.loss-curve-card__legend {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.legend-dot--white {
+    background-color: white;
+}
+
+.legend-dot--blue {
+    background-color: var(--accent-blue);
+}
+
+.loss-curve-card__chart {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    padding-top: var(--space-md);
+}
+
+.loss-bar {
+    flex: 1;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border-radius: 2px;
+    transition: height var(--transition-slow);
+}
+
+/* Hardware Card */
+.hardware-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+}
+
+.hardware-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.hardware-card__icon {
+    color: var(--text-tertiary);
+}
+
+.hardware-card__title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.hardware-card__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+/* Gauge Item */
+.gauge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-md);
+}
+
+.gauge-item__ring {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.gauge-item__value {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.gauge-item__number {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: white;
+}
+
+.gauge-item__unit {
+    font-size: 9px;
+    color: var(--text-tertiary);
+}
+
+.gauge-item__label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
