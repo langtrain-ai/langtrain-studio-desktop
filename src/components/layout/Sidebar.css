@@ -38,9 +38,9 @@
 .sidebar__logo-title {
     font-family: var(--font-gabarito);
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 400;
     color: var(--text-primary);
-    letter-spacing: 0.015em;
+    letter-spacing: 0.1%;
 }
 
 .sidebar__logo-subtitle {
