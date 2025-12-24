@@ -270,6 +270,44 @@ class LangtrainAPIClient {
         return this.request(`files?workspace_id=${workspaceId}`);
     }
 
+    async uploadDataset(
+        file: File,
+        purpose: string = 'fine-tune',
+        workspaceId: string = 'default'
+    ): Promise<DatasetInfo> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('purpose', purpose);
+        formData.append('workspace_id', workspaceId);
+
+        const url = `${API_CONFIG.apiURL}/files`;
+        const token = localStorage.getItem('langtrain_auth_token');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'User-Agent': 'Langtrain-Studio-Desktop/1.0',
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new APIError(
+                'UPLOAD_FAILED',
+                errorData.message || 'Failed to upload dataset',
+                response.status
+            );
+        }
+
+        return response.json();
+    }
+
+    async deleteDataset(datasetId: string): Promise<void> {
+        await this.request(`files/${datasetId}`, { method: 'DELETE' });
+    }
+
     // Fine-tuning Jobs
     async createFineTuningJob(request: CreateFineTuneRequest): Promise<FineTuneJob> {
         return this.request('fine-tuning/jobs', {

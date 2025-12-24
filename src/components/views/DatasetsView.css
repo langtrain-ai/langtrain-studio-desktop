@@ -293,3 +293,106 @@
     color: var(--text-tertiary);
     opacity: 0.5;
 }
+
+/* Header Actions */
+.datasets-view__header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* Icon Button */
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.icon-button:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+.icon-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Upload Zone States */
+.datasets-view__upload-zone--uploading {
+    border-color: var(--accent-cyan);
+    pointer-events: none;
+}
+
+/* Upload Progress */
+.upload-progress {
+    width: 200px;
+    height: 4px;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: var(--space-sm);
+}
+
+.upload-progress__bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+    border-radius: var(--radius-full);
+    transition: width var(--transition-normal);
+}
+
+/* Deleting State */
+.dataset-row--deleting {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Spin Animation */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Button Styles */
+.button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.button--primary {
+    background: white;
+    color: black;
+}
+
+.button--primary:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.button--primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

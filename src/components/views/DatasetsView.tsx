@@ -1,9 +1,9 @@
 /**
  * Datasets View Component
- * Displays and manages training datasets
+ * Displays and manages training datasets with real file upload
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Database,
     Upload,
@@ -15,9 +15,12 @@ import {
     Search,
     Filter,
     Download,
-    Eye
+    Eye,
+    Loader,
+    RefreshCw
 } from 'lucide-react';
 import { apiClient, DatasetInfo } from '../../services/api';
+import { useToast } from '../common';
 import './DatasetsView.css';
 
 function formatBytes(bytes: number): string {
@@ -44,13 +47,14 @@ function getPurposeLabel(purpose: string): string {
 interface DatasetRowProps {
     dataset: DatasetInfo;
     onDelete: (id: string) => void;
+    isDeleting?: boolean;
 }
 
-function DatasetRow({ dataset, onDelete }: DatasetRowProps) {
+function DatasetRow({ dataset, onDelete, isDeleting }: DatasetRowProps) {
     const [showMenu, setShowMenu] = useState(false);
 
     return (
-        <div className="dataset-row">
+        <div className={`dataset-row ${isDeleting ? 'dataset-row--deleting' : ''}`}>
             <div className="dataset-row__icon">
                 <FileText size={18} />
             </div>
@@ -73,8 +77,9 @@ function DatasetRow({ dataset, onDelete }: DatasetRowProps) {
                 <button
                     className="icon-button"
                     onClick={() => setShowMenu(!showMenu)}
+                    disabled={isDeleting}
                 >
-                    <MoreVertical size={16} />
+                    {isDeleting ? <Loader size={16} className="spin" /> : <MoreVertical size={16} />}
                 </button>
                 {showMenu && (
                     <div className="dataset-row__dropdown">
@@ -102,6 +107,11 @@ export function DatasetsView() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [isDragging, setIsDragging] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const toast = useToast();
 
     useEffect(() => {
         loadDatasets();
@@ -115,13 +125,57 @@ export function DatasetsView() {
         } catch (err) {
             console.error('Failed to load datasets:', err instanceof Error ? err.message : 'Unknown error');
             setDatasets([]);
+            toast.error('Failed to load datasets. Please try again.');
         } finally {
             setIsLoading(false);
         }
     }
 
-    function handleDelete(id: string) {
-        console.log('Delete dataset:', id);
+    async function handleDelete(id: string) {
+        try {
+            setDeletingId(id);
+            await apiClient.deleteDataset(id);
+            setDatasets(prev => prev.filter(d => d.id !== id));
+            toast.success('Dataset deleted successfully');
+        } catch (err) {
+            console.error('Failed to delete dataset:', err);
+            toast.error('Failed to delete dataset');
+        } finally {
+            setDeletingId(null);
+        }
+    }
+
+    async function handleUpload(files: File[]) {
+        if (files.length === 0) return;
+
+        const validExtensions = ['.jsonl', '.csv', '.parquet', '.json'];
+        const validFiles = files.filter(f =>
+            validExtensions.some(ext => f.name.toLowerCase().endsWith(ext))
+        );
+
+        if (validFiles.length === 0) {
+            toast.error('Please upload JSONL, CSV, or Parquet files');
+            return;
+        }
+
+        setIsUploading(true);
+        setUploadProgress(0);
+
+        for (let i = 0; i < validFiles.length; i++) {
+            const file = validFiles[i];
+            try {
+                setUploadProgress(((i) / validFiles.length) * 100);
+                const newDataset = await apiClient.uploadDataset(file);
+                setDatasets(prev => [newDataset, ...prev]);
+                toast.success(`Uploaded ${file.name}`);
+            } catch (err) {
+                console.error(`Failed to upload ${file.name}:`, err);
+                toast.error(`Failed to upload ${file.name}`);
+            }
+        }
+
+        setUploadProgress(100);
+        setIsUploading(false);
     }
 
     function handleDragOver(e: React.DragEvent) {
@@ -137,7 +191,14 @@ export function DatasetsView() {
         e.preventDefault();
         setIsDragging(false);
         const files = Array.from(e.dataTransfer.files);
-        console.log('Dropped files:', files);
+        handleUpload(files);
+    }
+
+    function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+        if (e.target.files) {
+            const files = Array.from(e.target.files);
+            handleUpload(files);
+        }
     }
 
     const filteredDatasets = datasets.filter(d =>
@@ -148,16 +209,35 @@ export function DatasetsView() {
 
     return (
         <div className="datasets-view">
+            {/* Hidden file input */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept=".jsonl,.csv,.parquet,.json"
+                multiple
+                style={{ display: 'none' }}
+                onChange={handleFileSelect}
+            />
+
             {/* Header */}
             <div className="datasets-view__header">
                 <div className="datasets-view__title-section">
                     <h1 className="datasets-view__title">Datasets</h1>
                     <p className="datasets-view__subtitle">Upload and manage training datasets</p>
                 </div>
-                <button className="button button--primary">
-                    <Upload size={16} />
-                    Upload Dataset
-                </button>
+                <div className="datasets-view__header-actions">
+                    <button className="icon-button" onClick={loadDatasets} title="Refresh">
+                        <RefreshCw size={16} />
+                    </button>
+                    <button
+                        className="button button--primary"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                    >
+                        <Upload size={16} />
+                        Upload Dataset
+                    </button>
+                </div>
             </div>
 
             {/* Stats */}
@@ -180,14 +260,27 @@ export function DatasetsView() {
 
             {/* Upload Zone */}
             <div
-                className={`datasets-view__upload-zone ${isDragging ? 'datasets-view__upload-zone--active' : ''}`}
+                className={`datasets-view__upload-zone ${isDragging ? 'datasets-view__upload-zone--active' : ''} ${isUploading ? 'datasets-view__upload-zone--uploading' : ''}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onClick={() => !isUploading && fileInputRef.current?.click()}
             >
-                <Upload size={32} className="upload-icon" />
-                <span className="upload-text">Drag and drop files here, or click to browse</span>
-                <span className="upload-hint">Supports JSONL, CSV, and Parquet files</span>
+                {isUploading ? (
+                    <>
+                        <Loader size={32} className="upload-icon spin" />
+                        <span className="upload-text">Uploading...</span>
+                        <div className="upload-progress">
+                            <div className="upload-progress__bar" style={{ width: `${uploadProgress}%` }} />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <Upload size={32} className="upload-icon" />
+                        <span className="upload-text">Drag and drop files here, or click to browse</span>
+                        <span className="upload-hint">Supports JSONL, CSV, and Parquet files</span>
+                    </>
+                )}
             </div>
 
             {/* Search & Filter */}
@@ -209,7 +302,10 @@ export function DatasetsView() {
             {/* Dataset List */}
             <div className="datasets-view__content">
                 {isLoading ? (
-                    <div className="datasets-view__loading">Loading datasets...</div>
+                    <div className="datasets-view__loading">
+                        <Loader size={24} className="spin" />
+                        <span>Loading datasets...</span>
+                    </div>
                 ) : filteredDatasets.length === 0 ? (
                     <div className="datasets-view__empty">
                         <Database size={48} className="empty-icon" />
@@ -230,6 +326,7 @@ export function DatasetsView() {
                                 key={dataset.id}
                                 dataset={dataset}
                                 onDelete={handleDelete}
+                                isDeleting={deletingId === dataset.id}
                             />
                         ))}
                     </div>
