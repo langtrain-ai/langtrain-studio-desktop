@@ -80,8 +80,11 @@ export function LoginView() {
             <div className="login__branding">
                 <div className="login__branding-content">
                     <div className="login__logo">
-                        {/* Placeholder for logo */}
-                        <div className="login__logo-icon">LT</div>
+                        <img
+                            src="/langtrain-logo.svg"
+                            alt="Langtrain"
+                            className="login__logo-icon"
+                        />
                     </div>
 
                     <h1 className="login__title">Langtrain Studio</h1>
