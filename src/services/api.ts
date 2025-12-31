@@ -7,7 +7,7 @@
 export const API_CONFIG = {
     baseURL: 'https://api.langtrain.xyz',
     version: 'v1',
-    webURL: 'https://www.langtrain.xyz',
+    webURL: 'https://app.langtrain.xyz',
 
     get apiURL() {
         return `${this.baseURL}/${this.version}`;
