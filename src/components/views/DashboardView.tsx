@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Server, RefreshCw, Activity, AlertCircle, Loader } from 'lucide-react';
 import { apiClient, FineTuneJob, UsageResponse } from '../../services/api';
 import './DashboardView.css';
+import MetricsGrid from '../dashboard/MetricsGrid';
 
 interface MetricCardProps {
     title: string;
@@ -201,6 +202,9 @@ export function DashboardView() {
 
             {/* Content */}
             <div className="dashboard__content">
+                {/* Real-time Metrics */}
+                <MetricsGrid />
+
                 {/* Run Info Card */}
                 {activeJob ? (
                     <div className="run-info-card">
