@@ -15,6 +15,7 @@ import {
     TrendingDown
 } from 'lucide-react';
 import { apiClient, FineTuneJob } from '../../services/api';
+import { ConfigurationWidget, defaultConfig, TrainingConfig } from '../common/ConfigurationWidget';
 import './TrainingView.css';
 
 interface JobRowProps {
@@ -113,7 +114,10 @@ export function TrainingView() {
     const [jobs, setJobs] = useState<FineTuneJob[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedJob, setSelectedJob] = useState<FineTuneJob | null>(null);
+
     const [activeTab, setActiveTab] = useState<'metrics' | 'logs'>('metrics');
+    const [showConfig, setShowConfig] = useState(false);
+    const [newJobConfig, setNewJobConfig] = useState<TrainingConfig>(defaultConfig);
 
     useEffect(() => {
         loadJobs();
@@ -145,6 +149,14 @@ export function TrainingView() {
         }
     }
 
+    async function handleStartJob() {
+        console.log("Starting job with config:", newJobConfig);
+        // Here we would call apiClient.createJob(newJobConfig)
+        setShowConfig(false);
+        // Simulate job creation
+        setTimeout(loadJobs, 1000);
+    }
+
     const runningJobs = jobs.filter(j => ['running', 'in_progress'].includes(j.status.toLowerCase()));
     const completedJobs = jobs.filter(j => ['completed', 'succeeded'].includes(j.status.toLowerCase()));
 
@@ -154,9 +166,14 @@ export function TrainingView() {
             <div className="training-view__sidebar">
                 <div className="sidebar-header">
                     <h2>Training Jobs</h2>
-                    <button className="icon-button" onClick={loadJobs}>
-                        <RefreshCw size={14} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="icon-button" onClick={() => setShowConfig(true)} title="New Job">
+                            <span style={{ fontSize: '18px', fontWeight: 'bold' }}>+</span>
+                        </button>
+                        <button className="icon-button" onClick={loadJobs}>
+                            <RefreshCw size={14} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="sidebar-stats">
@@ -294,6 +311,20 @@ export function TrainingView() {
                     </div>
                 )}
             </div>
+
+            {/* Modal Overlay */}
+            {showConfig && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <button className="modal-close" onClick={() => setShowConfig(false)}>×</button>
+                        <ConfigurationWidget
+                            config={newJobConfig}
+                            setConfig={setNewJobConfig}
+                            onConfirm={handleStartJob}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
