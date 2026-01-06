@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { Layers, Activity, Zap, Beaker } from 'lucide-react';
 import './ConfigurationWidget.css';
+
 
 export interface TrainingConfig {
     learningRate: number;
