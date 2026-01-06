@@ -34,7 +34,7 @@ Langtrain Studio is a cross-platform desktop application for managing AI model f
 ### Core Functionality
 - **TOTP Authentication** - Secure 2FA login with authenticator apps
 - **Real-time Monitoring** - Live training metrics and logs
-- **Cross-platform** - Native apps for macOS, Windows, and Linux
+- **Cross-platform** - Native apps for Windows and Linux (macOS via Swift app)
 - **Offline Support** - Works offline with local model training
 - **Cloud Sync** - Seamless sync with Langtrain cloud infrastructure
 
@@ -52,10 +52,12 @@ Download the latest release for your platform:
 
 | Platform | Download |
 |----------|----------|
-| macOS (Universal) | [Langtrain Studio.dmg](https://github.com/langtrain-ai/langtrain-studio-desktop/releases) |
 | Windows (64-bit) | [Langtrain-Studio-Setup.exe](https://github.com/langtrain-ai/langtrain-studio-desktop/releases) |
 | Linux (AppImage) | [Langtrain-Studio.AppImage](https://github.com/langtrain-ai/langtrain-studio-desktop/releases) |
 | Linux (Debian) | [langtrain-studio.deb](https://github.com/langtrain-ai/langtrain-studio-desktop/releases) |
+
+> **macOS Users**: Please download the native Swift app from [langtrain-studio](https://github.com/langtrain-ai/langtrain-studio/releases) for the best experience on Apple Silicon and Intel Macs.
+
 
 ### Build from Source
 
@@ -64,7 +66,6 @@ Download the latest release for your platform:
 - [Node.js](https://nodejs.org/) 18+
 - [Rust](https://rustup.rs/) 1.70+
 - Platform-specific dependencies:
-  - **macOS**: Xcode Command Line Tools
   - **Windows**: Visual Studio Build Tools
   - **Linux**: `libwebkit2gtk-4.1-dev`, `libssl-dev`, `libgtk-3-dev`
 
