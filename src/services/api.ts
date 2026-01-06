@@ -336,6 +336,53 @@ class LangtrainAPIClient {
         return this.request(`workspaces/${workspaceId}/agents`);
     }
 
+    async createAgent(workspaceId: string, agent: Partial<AgentInfo>): Promise<AgentInfo> {
+        return this.request(`workspaces/${workspaceId}/agents`, {
+            method: 'POST',
+            body: agent,
+        });
+    }
+
+    async updateAgent(id: string, agent: Partial<AgentInfo>): Promise<AgentInfo> {
+        return this.request(`agents/${id}`, {
+            method: 'PUT',
+            body: agent,
+        });
+    }
+
+    async deleteAgent(id: string): Promise<void> {
+        await this.request(`agents/${id}`, { method: 'DELETE' });
+    }
+
+    async runAgent(id: string, messages: Array<{ role: string; content: string }>): Promise<unknown> {
+        return this.request(`agents/${id}/runs`, {
+            method: 'POST',
+            body: { input: { messages } },
+        });
+    }
+
+    // Chat Completions (Inference)
+    async chatCompletions(request: {
+        model: string;
+        messages: Array<{ role: string; content: string }>;
+        temperature?: number;
+        maxTokens?: number;
+    }): Promise<unknown> {
+        return this.request('chat/completions', {
+            method: 'POST',
+            body: request,
+        });
+    }
+
+    // Hub Models (for model browser)
+    async getHubModels(): Promise<{ models: ModelInfo[] }> {
+        return this.request('../hub/', { requiresAuth: false });
+    }
+
+    async searchHubModels(query: string): Promise<{ models: ModelInfo[] }> {
+        return this.request(`hub/search?q=${encodeURIComponent(query)}`, { requiresAuth: false });
+    }
+
     // Health Check
     async healthCheck(): Promise<HealthResponse> {
         return this.request('../health', { requiresAuth: false });
@@ -352,3 +399,4 @@ class LangtrainAPIClient {
 }
 
 export const apiClient = LangtrainAPIClient.getInstance();
+
