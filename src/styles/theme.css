@@ -4,11 +4,13 @@
 
 :root {
   /* Colors - Background (matched to Swift Theme) */
-  --bg-primary: #09090B;
-  --bg-sidebar: #050506;
-  --bg-card: #121214;
+  --bg-primary: #030014;
+  /* Deep Space */
+  --bg-sidebar: #020205;
+  --bg-card: #0F0F0F;
   --bg-elevated: #1A1A1C;
-  --border-color: #27272A;
+  --bg-glass: rgba(15, 15, 15, 0.6);
+  --border-color: rgba(255, 255, 255, 0.08);
 
   /* Colors - Text (matched to Swift Theme) */
   --text-primary: #FFFFFF;
@@ -19,9 +21,11 @@
   --accent-cyan: #06B6D4;
   --accent-green: #22C55E;
   --accent-red: #EF4444;
-  --accent-purple: #A855F7;
+  --accent-purple: #9D7BFF;
   --accent-blue: #3B82F6;
   --accent-orange: #F97316;
+  --color-electric: #2E5CFF;
+  --color-purple: #9D7BFF;
 
 
   /* Spacing */

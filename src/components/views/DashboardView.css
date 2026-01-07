@@ -8,6 +8,35 @@
     flex-direction: column;
     height: 100%;
     background-color: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Ambient Spotlights */
+.dashboard::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(46, 92, 255, 0.15), transparent 70%);
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.dashboard::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(157, 123, 255, 0.15), transparent 70%);
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* Header */
@@ -72,10 +101,15 @@
 
 /* Run Info Card */
 .run-info-card {
-    background-color: var(--bg-card);
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     padding: var(--space-lg);
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
 }
 
 .run-info-card__header {
@@ -119,7 +153,8 @@
     flex-direction: column;
     gap: var(--space-sm);
     padding: var(--space-md);
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-md);
 }
 
@@ -182,12 +217,22 @@
 
 /* Metric Card */
 .metric-card {
-    background-color: var(--bg-card);
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
+    transition: transform var(--transition-normal), border-color var(--transition-normal);
+}
+
+.metric-card:hover {
+    border-color: rgba(46, 92, 255, 0.5);
+    transform: translateY(-2px);
 }
 
 .metric-card__title {
@@ -243,12 +288,16 @@
 
 /* Loss Curve Card */
 .loss-curve-card {
-    background-color: var(--bg-card);
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
 }
 
 .loss-curve-card__header {
@@ -308,10 +357,14 @@
 
 /* Hardware Card */
 .hardware-card {
-    background-color: var(--bg-card);
+    background-color: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
+    position: relative;
+    z-index: 1;
 }
 
 .hardware-card__header {
