@@ -7,3 +7,4 @@ export { ModelsView } from './ModelsView';
 export { TrainingView } from './TrainingView';
 export { AnalyticsView } from './AnalyticsView';
 export { SettingsView } from './SettingsView';
+export { AgentsView } from './AgentsView';

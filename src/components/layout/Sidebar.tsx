@@ -15,6 +15,7 @@ import {
     Users,
     BookOpen,
     LogOut,
+    Bot,
     type LucideIcon,
 } from 'lucide-react';
 import { sidebarItems, systemItems } from '../../lib/theme';
@@ -31,6 +32,7 @@ const iconMap: Record<string, LucideIcon> = {
     LineChart,
     Settings,
     BookOpen,
+    Bot,
 };
 
 interface SidebarItemProps {

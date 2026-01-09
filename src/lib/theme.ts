@@ -65,6 +65,7 @@ export type Theme = typeof theme;
 // Sidebar navigation items
 export const sidebarItems = [
     { id: 'dashboard', title: 'Dashboard', icon: 'Home', path: '/' },
+    { id: 'agents', title: 'Agents', icon: 'Bot', path: '/agents' },
     { id: 'projects', title: 'Projects', icon: 'Layers', path: '/projects' },
     { id: 'datasets', title: 'Datasets', icon: 'Database', path: '/datasets' },
     { id: 'models', title: 'Models', icon: 'Cpu', path: '/models' },
