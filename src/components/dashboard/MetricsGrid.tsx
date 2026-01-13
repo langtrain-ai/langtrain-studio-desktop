@@ -52,14 +52,20 @@ const MetricsGrid = () => {
     ];
 
     return (
-        <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
             {cards.map((c, i) => (
-                <div key={i} className="metric-card" style={{ padding: '1rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '0.75rem', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                        <span style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>{c.title}</span>
-                        <c.icon size={16} color="var(--accent-primary, #646cff)" />
+                <div key={i} className="metric-card" style={{
+                    padding: 'var(--space-md)',
+                    background: 'var(--bg-glass)',
+                    borderRadius: 'var(--radius-lg)',
+                    border: '1px solid var(--border-color)',
+                    backdropFilter: 'blur(12px)'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
+                        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)' }}>{c.title}</span>
+                        <c.icon size={16} color="var(--accent-cyan)" />
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{c.val}</div>
+                    <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold', color: 'var(--text-primary)' }}>{c.val}</div>
                 </div>
             ))}
         </div>

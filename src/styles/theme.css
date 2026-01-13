@@ -3,29 +3,28 @@
  */
 
 :root {
-  /* Colors - Background (matched to Swift Theme) */
-  --bg-primary: #030014;
-  /* Deep Space */
-  --bg-sidebar: #020205;
-  --bg-card: #0F0F0F;
-  --bg-elevated: #1A1A1C;
-  --bg-glass: rgba(15, 15, 15, 0.6);
-  --border-color: rgba(255, 255, 255, 0.08);
+  /* Colors - Background (matched to Centralized Design System) */
+  --bg-primary: #0D0D0F;
+  --bg-sidebar: #0F0F11;
+  --bg-card: #17171A;
+  --bg-elevated: #1F1F22;
+  --bg-glass: rgba(23, 23, 26, 0.7);
+  --border-color: #27272A;
 
-  /* Colors - Text (matched to Swift Theme) */
+  /* Colors - Text */
   --text-primary: #FFFFFF;
   --text-secondary: #A1A1AA;
   --text-tertiary: #71717A;
 
-  /* Colors - Accent (matched to Swift Theme) */
-  --accent-cyan: #06B6D4;
+  /* Colors - Accent */
+  --accent-cyan: #00F2FF;
   --accent-green: #22C55E;
   --accent-red: #EF4444;
-  --accent-purple: #9D7BFF;
-  --accent-blue: #3B82F6;
+  --accent-purple: #7C3AED;
+  --accent-blue: #1A73E8;
   --accent-orange: #F97316;
-  --color-electric: #2E5CFF;
-  --color-purple: #9D7BFF;
+  --color-electric: #00F2FF;
+  --color-purple: #7C3AED;
 
 
   /* Spacing */

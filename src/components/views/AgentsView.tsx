@@ -5,7 +5,6 @@
 
 import { useState } from 'react';
 import {
-    Bot,
     Code2,
     FileText,
     MessageSquare,
@@ -94,8 +93,8 @@ export function AgentsView() {
             {/* Main Content - Agent Grid */}
             <div className="agents-view__main">
                 <div className="agents-header">
-                    <h1>Agent Architecture</h1>
-                    <p className="agents-subtitle">Select an agent to configure</p>
+                    <h1>Agent Studio</h1>
+                    <p className="agents-subtitle">Select an agent to manage settings</p>
                 </div>
 
                 <div className="agents-grid">
@@ -127,7 +126,7 @@ export function AgentsView() {
                     <div className="sidebar-header">
                         <div className="sidebar-header__title">
                             <Settings size={16} className="sidebar-header__icon" />
-                            <span>Configuration</span>
+                            <span>Settings</span>
                         </div>
                         <button className="icon-button" onClick={() => setSelectedAgent(null)}>
                             <X size={16} />
@@ -201,9 +200,9 @@ export function AgentsView() {
                             </div>
                         </div>
 
-                        {/* Model Configuration */}
+                        {/* Model Settings */}
                         <div className="config-section">
-                            <div className="section-label">Model Configuration</div>
+                            <div className="section-label">Model Settings</div>
 
                             <div className="input-group">
                                 <label className="input-label">System Prompt</label>

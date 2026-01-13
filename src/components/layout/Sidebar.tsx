@@ -18,7 +18,7 @@ import {
     Bot,
     type LucideIcon,
 } from 'lucide-react';
-import { sidebarItems, systemItems } from '../../lib/theme';
+import { sidebarItems, systemItems } from '../../lib/design';
 import { useAuth } from '../../services/auth';
 import './Sidebar.css';
 
