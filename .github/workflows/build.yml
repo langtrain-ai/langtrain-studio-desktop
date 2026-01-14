@@ -80,3 +80,50 @@ jobs:
             src-tauri/target/release/bundle/**/*.AppImage
             src-tauri/target/release/bundle/**/*.deb
           if-no-files-found: ignore
+
+      - name: Sync Windows release to API
+        if: matrix.platform == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          curl -X POST "https://api.langtrain.xyz/api/v1/releases/ci" \
+            -H "X-Release-API-Key: $RELEASE_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"version\": \"$VERSION\",
+              \"platform\": \"windows\",
+              \"architecture\": \"x64\",
+              \"download_url\": \"https://github.com/${{ github.repository }}/releases/download/v$VERSION/LangtrainStudio-${VERSION}-x64-setup.exe\",
+              \"status\": \"active\",
+              \"changelog\": \"See release notes at https://github.com/${{ github.repository }}/releases/tag/v$VERSION\"
+            }"
+
+      - name: Sync Linux release to API
+        if: matrix.platform == 'ubuntu-22.04' && startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          # Sync AppImage
+          curl -X POST "https://api.langtrain.xyz/api/v1/releases/ci" \
+            -H "X-Release-API-Key: $RELEASE_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"version\": \"$VERSION\",
+              \"platform\": \"linux\",
+              \"architecture\": \"appimage\",
+              \"download_url\": \"https://github.com/${{ github.repository }}/releases/download/v$VERSION/LangtrainStudio-${VERSION}-amd64.AppImage\",
+              \"status\": \"active\"
+            }"
+          # Sync deb
+          curl -X POST "https://api.langtrain.xyz/api/v1/releases/ci" \
+            -H "X-Release-API-Key: $RELEASE_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"version\": \"$VERSION\",
+              \"platform\": \"linux\",
+              \"architecture\": \"deb\",
+              \"download_url\": \"https://github.com/${{ github.repository }}/releases/download/v$VERSION/LangtrainStudio-${VERSION}-amd64.deb\",
+              \"status\": \"active\"
+            }"
