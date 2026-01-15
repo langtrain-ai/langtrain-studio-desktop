@@ -153,6 +153,54 @@ export interface HealthResponse {
     version: string;
 }
 
+// Data Conversion Types
+export interface ColumnMappingInfo {
+    source: string;
+    target: string;
+    confidence: string;
+}
+
+export interface AnalyzeDatasetResponse {
+    file_format: string;
+    detected_schema: string;
+    column_mappings: ColumnMappingInfo[];
+    sample_count: number;
+    columns_found: string[];
+    confidence: number;
+    suggestions: string[];
+    warnings: string[];
+}
+
+export interface PreviewConversionResponse {
+    success: boolean;
+    target_schema: string;
+    preview_lines: string[];
+    total_rows: number;
+    errors: string[];
+    warnings: string[];
+}
+
+export interface ConvertToJSONLResponse {
+    success: boolean;
+    total_rows: number;
+    converted_rows: number;
+    skipped_rows: number;
+    target_schema: string;
+    errors: string[];
+    warnings: string[];
+    jsonl_content?: string;
+    message?: string;
+    size_bytes?: number;
+}
+
+export interface TargetSchemaInfo {
+    id: string;
+    name: string;
+    description: string;
+    fields: string[];
+    use_case: string;
+}
+
 export interface UsageResponse {
     tokens: { used: number; limit: number; percentage: number; unlimited: boolean };
     finetuneJobs: { used: number; limit: number; percentage: number; unlimited: boolean };
@@ -395,6 +443,128 @@ class LangtrainAPIClient {
 
     async getPlan(workspaceId: string): Promise<PlanResponse> {
         return this.request(`billing/plan?workspace_id=${workspaceId}`);
+    }
+
+    // ==========================================
+    // Data Conversion (Pattern Detection + JSONL)
+    // ==========================================
+
+    /**
+     * Analyze uploaded file to detect data patterns
+     */
+    async analyzeDataset(file: File): Promise<AnalyzeDatasetResponse> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const url = `${API_CONFIG.apiURL}/convert/analyze`;
+        const token = localStorage.getItem('langtrain_auth_token');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'User-Agent': 'Langtrain-Studio-Desktop/1.0',
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new APIError(
+                'ANALYSIS_FAILED',
+                errorData.detail || 'Failed to analyze dataset',
+                response.status
+            );
+        }
+
+        return response.json();
+    }
+
+    /**
+     * Preview conversion of file to JSONL
+     */
+    async previewConversion(
+        file: File,
+        options?: { targetSchema?: string; previewRows?: number }
+    ): Promise<PreviewConversionResponse> {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (options?.targetSchema) {
+            formData.append('target_schema', options.targetSchema);
+        }
+        if (options?.previewRows) {
+            formData.append('preview_rows', options.previewRows.toString());
+        }
+
+        const url = `${API_CONFIG.apiURL}/convert/preview`;
+        const token = localStorage.getItem('langtrain_auth_token');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'User-Agent': 'Langtrain-Studio-Desktop/1.0',
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new APIError(
+                'PREVIEW_FAILED',
+                errorData.detail || 'Failed to preview conversion',
+                response.status
+            );
+        }
+
+        return response.json();
+    }
+
+    /**
+     * Execute full conversion to JSONL
+     */
+    async convertToJSONL(
+        file: File,
+        options?: { targetSchema?: string; customMappings?: Record<string, string> }
+    ): Promise<ConvertToJSONLResponse> {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (options?.targetSchema) {
+            formData.append('target_schema', options.targetSchema);
+        }
+        if (options?.customMappings) {
+            formData.append('custom_mappings', JSON.stringify(options.customMappings));
+        }
+
+        const url = `${API_CONFIG.apiURL}/convert/execute`;
+        const token = localStorage.getItem('langtrain_auth_token');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'User-Agent': 'Langtrain-Studio-Desktop/1.0',
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new APIError(
+                'CONVERSION_FAILED',
+                errorData.detail || 'Failed to convert dataset',
+                response.status
+            );
+        }
+
+        return response.json();
+    }
+
+    /**
+     * Get available target schemas for conversion
+     */
+    async getConversionSchemas(): Promise<{ schemas: TargetSchemaInfo[] }> {
+        return this.request('convert/schemas', { requiresAuth: false });
     }
 }
 
