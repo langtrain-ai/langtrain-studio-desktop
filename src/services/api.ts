@@ -201,6 +201,79 @@ export interface TargetSchemaInfo {
     use_case: string;
 }
 
+// Bias Rules Types
+export interface BiasCondition {
+    type: 'contains' | 'regex' | 'semantic' | 'ml_classifier';
+    field: string;  // prompt, completion, text, any
+    patterns: string[];
+    context?: Record<string, unknown>;
+    case_sensitive?: boolean;
+}
+
+export interface BiasAction {
+    type: 'block' | 'warn' | 'modify' | 'downweight';
+    message: string;
+    replacement?: string;
+    weight?: number;
+}
+
+export interface BiasRule {
+    id: string;
+    workspace_id: string;
+    name: string;
+    description?: string;
+    condition: BiasCondition;
+    action: BiasAction;
+    threshold: number;
+    enabled: boolean;
+    created_by?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface BiasRuleCreate {
+    name: string;
+    description?: string;
+    workspace_id: string;
+    condition: BiasCondition;
+    action: BiasAction;
+    threshold?: number;
+    enabled?: boolean;
+}
+
+export interface BiasValidationResult {
+    valid: boolean;
+    violations: BiasViolation[];
+    samples_checked: number;
+    samples_blocked: number;
+    samples_warned: number;
+    samples_modified: number;
+    samples_downweighted: number;
+}
+
+export interface BiasViolation {
+    rule_id: string;
+    rule_name: string;
+    field: string;
+    matched_pattern: string;
+    confidence: number;
+    action: BiasAction;
+    sample_index?: number;
+}
+
+export interface BiasImpactAnalysis {
+    total_samples: number;
+    affected_samples: number;
+    blocked_samples: number;
+    blocked_percentage: number;
+    warned_samples: number;
+    warned_percentage: number;
+    modified_samples: number;
+    downweighted_samples: number;
+    violations_by_rule: Record<string, number>;
+    rules_checked: number;
+}
+
 export interface UsageResponse {
     tokens: { used: number; limit: number; percentage: number; unlimited: boolean };
     finetuneJobs: { used: number; limit: number; percentage: number; unlimited: boolean };
@@ -565,6 +638,136 @@ class LangtrainAPIClient {
      */
     async getConversionSchemas(): Promise<{ schemas: TargetSchemaInfo[] }> {
         return this.request('convert/schemas', { requiresAuth: false });
+    }
+
+    // ==========================================
+    // Bias Rules
+    // ==========================================
+
+    /**
+     * Create a new bias rule
+     */
+    async createBiasRule(rule: BiasRuleCreate): Promise<BiasRule> {
+        return this.request('bias-rules/', {
+            method: 'POST',
+            body: rule,
+        });
+    }
+
+    /**
+     * List bias rules for a workspace
+     */
+    async listBiasRules(workspaceId: string, enabledOnly: boolean = false): Promise<BiasRule[]> {
+        const params = new URLSearchParams({ workspace_id: workspaceId });
+        if (enabledOnly) params.append('enabled_only', 'true');
+        return this.request(`bias-rules/?${params.toString()}`);
+    }
+
+    /**
+     * Get a single bias rule
+     */
+    async getBiasRule(ruleId: string): Promise<BiasRule> {
+        return this.request(`bias-rules/${ruleId}`);
+    }
+
+    /**
+     * Update a bias rule
+     */
+    async updateBiasRule(ruleId: string, updates: Partial<BiasRuleCreate>): Promise<BiasRule> {
+        return this.request(`bias-rules/${ruleId}`, {
+            method: 'PUT',
+            body: updates,
+        });
+    }
+
+    /**
+     * Delete a bias rule
+     */
+    async deleteBiasRule(ruleId: string): Promise<{ success: boolean }> {
+        return this.request(`bias-rules/${ruleId}`, { method: 'DELETE' });
+    }
+
+    /**
+     * Validate text against bias rules
+     */
+    async validateTextWithBiasRules(
+        text: string,
+        ruleIds: string[]
+    ): Promise<BiasValidationResult> {
+        return this.request('bias-rules/validate/text', {
+            method: 'POST',
+            body: { text, rule_ids: ruleIds },
+        });
+    }
+
+    /**
+     * Validate file against bias rules
+     */
+    async validateFileWithBiasRules(
+        file: File,
+        ruleIds: string[]
+    ): Promise<BiasValidationResult & { filename: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('rule_ids', JSON.stringify(ruleIds));
+
+        const url = `${API_CONFIG.apiURL}/bias-rules/validate/file`;
+        const token = localStorage.getItem('langtrain_auth_token');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'User-Agent': 'Langtrain-Studio-Desktop/1.0',
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new APIError(
+                'VALIDATION_FAILED',
+                errorData.detail || 'Failed to validate file',
+                response.status
+            );
+        }
+
+        return response.json();
+    }
+
+    /**
+     * Analyze impact of bias rules on a file
+     */
+    async analyzeBiasImpact(
+        file: File,
+        ruleIds: string[]
+    ): Promise<BiasImpactAnalysis & { filename: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('rule_ids', JSON.stringify(ruleIds));
+
+        const url = `${API_CONFIG.apiURL}/bias-rules/analyze/file`;
+        const token = localStorage.getItem('langtrain_auth_token');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'User-Agent': 'Langtrain-Studio-Desktop/1.0',
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new APIError(
+                'ANALYSIS_FAILED',
+                errorData.detail || 'Failed to analyze bias impact',
+                response.status
+            );
+        }
+
+        return response.json();
     }
 }
 
