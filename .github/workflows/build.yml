@@ -97,7 +97,7 @@ jobs:
             changelog = "See release notes at https://github.com/${{ github.repository }}/releases/tag/v$VERSION"
           } | ConvertTo-Json
           
-          Invoke-RestMethod -Uri "https://api.langtrain.xyz/api/v1/releases/ci" `
+          Invoke-RestMethod -Uri "https://api.langtrain.xyz/v1/releases/ci" `
             -Method Post `
             -Headers @{ "X-Release-API-Key" = $env:RELEASE_API_KEY; "Content-Type" = "application/json" } `
             -Body $body
@@ -110,7 +110,7 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           # Sync AppImage
-          curl -X POST "https://api.langtrain.xyz/api/v1/releases/ci" \
+          curl -X POST "https://api.langtrain.xyz/v1/releases/ci" \
             -H "X-Release-API-Key: $RELEASE_API_KEY" \
             -H "Content-Type: application/json" \
             -d "{
@@ -121,7 +121,7 @@ jobs:
               \"status\": \"active\"
             }"
           # Sync deb
-          curl -X POST "https://api.langtrain.xyz/api/v1/releases/ci" \
+          curl -X POST "https://api.langtrain.xyz/v1/releases/ci" \
             -H "X-Release-API-Key: $RELEASE_API_KEY" \
             -H "Content-Type: application/json" \
             -d "{
