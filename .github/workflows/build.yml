@@ -92,7 +92,7 @@ jobs:
             version = $VERSION
             platform = "windows"
             architecture = "x64"
-            download_url = "https://github.com/${{ github.repository }}/releases/download/v$VERSION/LangtrainStudio-$VERSION-x64-setup.exe"
+            download_url = "https://github.com/${{ github.repository }}/releases/download/v$VERSION/Langtrain.Studio_${VERSION}_x64-setup.exe"
             status = "active"
             changelog = "See release notes at https://github.com/${{ github.repository }}/releases/tag/v$VERSION"
           } | ConvertTo-Json
@@ -117,7 +117,7 @@ jobs:
               \"version\": \"$VERSION\",
               \"platform\": \"linux\",
               \"architecture\": \"appimage\",
-              \"download_url\": \"https://github.com/${{ github.repository }}/releases/download/v$VERSION/LangtrainStudio-${VERSION}-amd64.AppImage\",
+              \"download_url\": \"https://github.com/${{ github.repository }}/releases/download/v$VERSION/Langtrain.Studio_${VERSION}_amd64.AppImage\",
               \"status\": \"active\"
             }"
           # Sync deb
@@ -128,6 +128,6 @@ jobs:
               \"version\": \"$VERSION\",
               \"platform\": \"linux\",
               \"architecture\": \"deb\",
-              \"download_url\": \"https://github.com/${{ github.repository }}/releases/download/v$VERSION/LangtrainStudio-${VERSION}-amd64.deb\",
+              \"download_url\": \"https://github.com/${{ github.repository }}/releases/download/v$VERSION/Langtrain.Studio_${VERSION}_amd64.deb\",
               \"status\": \"active\"
             }"
