@@ -16,6 +16,7 @@ import {
     BookOpen,
     LogOut,
     Bot,
+    Sparkles,
     type LucideIcon,
 } from 'lucide-react';
 import { sidebarItems, systemItems } from '../../lib/design';
@@ -33,6 +34,7 @@ const iconMap: Record<string, LucideIcon> = {
     Settings,
     BookOpen,
     Bot,
+    Sparkles,
 };
 
 interface SidebarItemProps {

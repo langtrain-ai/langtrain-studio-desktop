@@ -15,7 +15,8 @@ import {
   TrainingView,
   AnalyticsView,
   SettingsView,
-  AgentsView
+  AgentsView,
+  CurationView
 } from './components/views';
 import { useAuth } from './services/auth';
 import './styles/theme.css';
@@ -64,6 +65,7 @@ function AppRoutes() {
         <Route path="/agents" element={<AgentsView />} />
         <Route path="/projects" element={<ProjectsView />} />
         <Route path="/datasets" element={<DatasetsView />} />
+        <Route path="/curation" element={<CurationView />} />
         <Route path="/models" element={<ModelsView />} />
         <Route path="/training" element={<TrainingView />} />
         <Route path="/analytics" element={<AnalyticsView />} />

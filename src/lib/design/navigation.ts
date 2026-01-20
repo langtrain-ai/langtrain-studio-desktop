@@ -10,6 +10,7 @@ export const sidebarItems: readonly NavItem[] = [
     { id: 'agents', title: 'Agents', icon: 'Bot', path: '/agents' },
     { id: 'projects', title: 'Projects', icon: 'Layers', path: '/projects' },
     { id: 'datasets', title: 'Datasets', icon: 'Database', path: '/datasets' },
+    { id: 'curation', title: 'Data Curation', icon: 'Sparkles', path: '/curation' },
     { id: 'models', title: 'Models', icon: 'Cpu', path: '/models' },
     { id: 'training', title: 'Training', icon: 'Terminal', path: '/training' },
     { id: 'analytics', title: 'Analytics', icon: 'LineChart', path: '/analytics' },
