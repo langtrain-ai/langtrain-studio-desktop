@@ -16,15 +16,20 @@
   --text-secondary: #A1A1AA;
   --text-tertiary: #71717A;
 
-  /* Colors - Accent */
+  /* Colors - Accent (Synced with langtrain-web brand) */
+  --accent-electric: #7C3AED;
+  --accent-purple: #A855F7;
   --accent-cyan: #00F2FF;
   --accent-green: #22C55E;
+  --accent-emerald: #10B981;
   --accent-red: #EF4444;
-  --accent-purple: #7C3AED;
-  --accent-blue: #1A73E8;
+  --accent-blue: #3B82F6;
   --accent-orange: #F97316;
-  --color-electric: #00F2FF;
-  --color-purple: #7C3AED;
+  --accent-yellow: #FACC15;
+
+  /* Brand primary */
+  --color-electric: #7C3AED;
+  --color-purple: #A855F7;
 
 
   /* Spacing */

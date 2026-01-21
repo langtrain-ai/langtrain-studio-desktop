@@ -20,7 +20,7 @@
     left: -10%;
     width: 60vw;
     height: 60vw;
-    background: radial-gradient(circle, rgba(46, 92, 255, 0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.15), transparent 70%);
     filter: blur(120px);
     pointer-events: none;
     z-index: 0;
@@ -33,7 +33,7 @@
     right: -10%;
     width: 60vw;
     height: 60vw;
-    background: radial-gradient(circle, rgba(157, 123, 255, 0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.12), transparent 70%);
     filter: blur(120px);
     pointer-events: none;
     z-index: 0;
@@ -231,7 +231,7 @@
 }
 
 .metric-card:hover {
-    border-color: rgba(46, 92, 255, 0.5);
+    border-color: rgba(124, 58, 237, 0.5);
     transform: translateY(-2px);
 }
 
@@ -568,7 +568,7 @@
 
 .usage-summary__fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+    background: linear-gradient(90deg, var(--accent-electric), var(--accent-purple));
     border-radius: var(--radius-full);
     transition: width var(--transition-normal);
 }

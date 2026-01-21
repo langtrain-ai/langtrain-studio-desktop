@@ -95,8 +95,8 @@
 }
 
 .sidebar-item--active {
-    color: var(--text-primary);
-    background-color: var(--bg-elevated);
+    color: var(--accent-electric);
+    background-color: rgba(124, 58, 237, 0.1);
 }
 
 .sidebar-item__icon {
@@ -110,6 +110,10 @@
 
 .sidebar-item--active .sidebar-item__title {
     font-weight: 500;
+}
+
+.sidebar-item--active .sidebar-item__icon {
+    color: var(--accent-electric);
 }
 
 /* Footer */
