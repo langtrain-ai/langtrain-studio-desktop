@@ -3,14 +3,18 @@
  * Ported from Swift LangtrainAPI.swift
  */
 
+import { settings } from '../lib/settings';
+
 // API Configuration
 export const API_CONFIG = {
-    baseURL: 'https://api.langtrain.xyz',
+    get baseURL() {
+        return settings.get().apiBaseUrl;
+    },
     version: 'v1',
     webURL: 'https://app.langtrain.xyz',
 
     get apiURL() {
-        return `${this.baseURL}/${this.version}`;
+        return settings.getApiUrl(this.version);
     },
 
     get authURL() {
