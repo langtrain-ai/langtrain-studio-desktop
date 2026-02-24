@@ -116,23 +116,23 @@ class AuthManager {
 
     // Token management
     getToken(): string | null {
-        return localStorage.getItem('langtrain_auth_token');
+        return secureStorage.getItem('langtrain_auth_token');
     }
 
     getRefreshToken(): string | null {
-        return localStorage.getItem('langtrain_refresh_token');
+        return secureStorage.getItem('langtrain_refresh_token');
     }
 
     private setTokens(accessToken: string, refreshToken?: string) {
-        localStorage.setItem('langtrain_auth_token', accessToken);
+        secureStorage.setItem('langtrain_auth_token', accessToken);
         if (refreshToken) {
-            localStorage.setItem('langtrain_refresh_token', refreshToken);
+            secureStorage.setItem('langtrain_refresh_token', refreshToken);
         }
     }
 
     private clearTokens() {
-        localStorage.removeItem('langtrain_auth_token');
-        localStorage.removeItem('langtrain_refresh_token');
+        secureStorage.removeItem('langtrain_auth_token');
+        secureStorage.removeItem('langtrain_refresh_token');
     }
 
     // Auth methods
@@ -270,7 +270,7 @@ class AuthManager {
 
     logout(): void {
         this.clearTokens();
-        localStorage.clear();
+        secureStorage.clear();
         sessionStorage.clear();
         this.setState({
             isAuthenticated: false,

@@ -17,15 +17,16 @@ interface MetricsData {
     };
 }
 
+import { API_CONFIG } from '../../services/api';
+
 const MetricsGrid = () => {
     const [metrics, setMetrics] = useState<MetricsData | null>(null);
 
     useEffect(() => {
-        // In desktop app, we might need a configurable base URL. 
-        // For now assuming localhost:8000 or the same network interface.
         const fetchMetrics = async () => {
             try {
-                const res = await fetch('http://localhost:8000/metrics');
+                // Fetch metrics from the actual configure backend 
+                const res = await fetch(`${API_CONFIG.baseURL}/metrics`);
                 if (res.ok) {
                     const data = await res.json();
                     setMetrics(data);

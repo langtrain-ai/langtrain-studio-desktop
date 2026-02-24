@@ -336,7 +336,7 @@ class LangtrainAPIClient {
         };
 
         if (requiresAuth) {
-            const token = localStorage.getItem('langtrain_auth_token');
+            const token = secureStorage.getItem('langtrain_auth_token');
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
@@ -352,7 +352,7 @@ class LangtrainAPIClient {
             switch (response.status) {
                 case 401:
                     // Clear auth on unauthorized
-                    localStorage.removeItem('langtrain_auth_token');
+                    secureStorage.removeItem('langtrain_auth_token');
                     throw APIError.unauthorized();
                 case 403:
                     throw APIError.forbidden();
@@ -406,7 +406,7 @@ class LangtrainAPIClient {
         formData.append('workspace_id', workspaceId);
 
         const url = `${API_CONFIG.apiURL}/files`;
-        const token = localStorage.getItem('langtrain_auth_token');
+        const token = secureStorage.getItem('langtrain_auth_token');
 
         const response = await fetch(url, {
             method: 'POST',
@@ -534,7 +534,7 @@ class LangtrainAPIClient {
         formData.append('file', file);
 
         const url = `${API_CONFIG.apiURL}/convert/analyze`;
-        const token = localStorage.getItem('langtrain_auth_token');
+        const token = secureStorage.getItem('langtrain_auth_token');
 
         const response = await fetch(url, {
             method: 'POST',
@@ -574,7 +574,7 @@ class LangtrainAPIClient {
         }
 
         const url = `${API_CONFIG.apiURL}/convert/preview`;
-        const token = localStorage.getItem('langtrain_auth_token');
+        const token = secureStorage.getItem('langtrain_auth_token');
 
         const response = await fetch(url, {
             method: 'POST',
@@ -614,7 +614,7 @@ class LangtrainAPIClient {
         }
 
         const url = `${API_CONFIG.apiURL}/convert/execute`;
-        const token = localStorage.getItem('langtrain_auth_token');
+        const token = secureStorage.getItem('langtrain_auth_token');
 
         const response = await fetch(url, {
             method: 'POST',
@@ -716,7 +716,7 @@ class LangtrainAPIClient {
         formData.append('rule_ids', JSON.stringify(ruleIds));
 
         const url = `${API_CONFIG.apiURL}/bias-rules/validate/file`;
-        const token = localStorage.getItem('langtrain_auth_token');
+        const token = secureStorage.getItem('langtrain_auth_token');
 
         const response = await fetch(url, {
             method: 'POST',
@@ -751,7 +751,7 @@ class LangtrainAPIClient {
         formData.append('rule_ids', JSON.stringify(ruleIds));
 
         const url = `${API_CONFIG.apiURL}/bias-rules/analyze/file`;
-        const token = localStorage.getItem('langtrain_auth_token');
+        const token = secureStorage.getItem('langtrain_auth_token');
 
         const response = await fetch(url, {
             method: 'POST',

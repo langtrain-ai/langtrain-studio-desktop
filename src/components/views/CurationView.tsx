@@ -3,7 +3,7 @@
  * Data curation and pruning with visual analysis
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Sparkles,
     Scissors,
@@ -40,6 +40,8 @@ interface DatasetProfile {
     stats: DatasetStats;
     profiles: RowProfile[];
 }
+
+import { homeApi } from '../../services/homeApi';
 
 // Loss histogram component
 function LossHistogram({ profiles, minThreshold, maxThreshold }: {
@@ -107,47 +109,35 @@ export function CurationView() {
     const [profile, setProfile] = useState<DatasetProfile | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isPruning, setIsPruning] = useState(false);
+    const [availableDatasets, setAvailableDatasets] = useState<{ id: string; name: string }[]>([]);
+
+    // Load available datasets
+    useEffect(() => {
+        homeApi.listDatasets().then(res => {
+            if (res && res.data) {
+                setAvailableDatasets(res.data);
+            }
+        }).catch(err => {
+            console.error("Failed to fetch datasets for curation", err);
+        });
+    }, []);
 
     // Threshold controls
     const [minLoss, setMinLoss] = useState(1.0);
     const [maxLoss, setMaxLoss] = useState(5.0);
 
-    // Mock function to simulate scout pass
     async function handleAnalyze() {
         if (!selectedFile) return;
 
         setIsAnalyzing(true);
-
-        // Simulate API call delay
-        await new Promise(r => setTimeout(r, 2000));
-
-        // Mock profile data
-        const mockProfiles: RowProfile[] = Array.from({ length: 500 }, (_, i) => ({
-            index: i,
-            loss: Math.random() * 8 + 0.5,
-            text_length: Math.floor(Math.random() * 1000) + 50,
-            tokens: Math.floor(Math.random() * 200) + 10
-        }));
-
-        const mockStats: DatasetStats = {
-            mean_loss: 3.2,
-            min_loss: 0.5,
-            max_loss: 8.5,
-            trivial_count: mockProfiles.filter(p => p.loss < 1).length,
-            easy_count: mockProfiles.filter(p => p.loss >= 1 && p.loss < 2.5).length,
-            medium_count: mockProfiles.filter(p => p.loss >= 2.5 && p.loss < 4.5).length,
-            hard_count: mockProfiles.filter(p => p.loss >= 4.5 && p.loss < 7).length,
-            noise_count: mockProfiles.filter(p => p.loss >= 7).length
-        };
-
-        setProfile({
-            source_file: selectedFile,
-            total_rows: 500,
-            stats: mockStats,
-            profiles: mockProfiles
-        });
-
-        setIsAnalyzing(false);
+        try {
+            const data = await homeApi.getDatasetProfile(selectedFile);
+            setProfile(data);
+        } catch (e) {
+            console.error("Failed profiling dataset", e);
+        } finally {
+            setIsAnalyzing(false);
+        }
     }
 
     async function handlePrune() {
@@ -193,9 +183,9 @@ export function CurationView() {
                     className="curation-select"
                 >
                     <option value="">-- Choose Dataset --</option>
-                    <option value="training_data.jsonl">training_data.jsonl</option>
-                    <option value="customer_support.jsonl">customer_support.jsonl</option>
-                    <option value="code_examples.jsonl">code_examples.jsonl</option>
+                    {availableDatasets.map((ds) => (
+                        <option key={ds.id} value={ds.id}>{ds.name}</option>
+                    ))}
                 </select>
                 <button
                     className="button button--primary"

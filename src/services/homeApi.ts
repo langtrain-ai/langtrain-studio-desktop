@@ -84,7 +84,7 @@ class HomeAPIClient {
             'User-Agent': 'Langtrain-Studio-Desktop/1.0',
         };
 
-        const token = localStorage.getItem('langtrain_auth_token');
+        const token = secureStorage.getItem('langtrain_auth_token');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -98,7 +98,7 @@ class HomeAPIClient {
         if (!response.ok) {
             switch (response.status) {
                 case 401:
-                    localStorage.removeItem('langtrain_auth_token');
+                    secureStorage.removeItem('langtrain_auth_token');
                     throw APIError.unauthorized();
                 case 403:
                     throw APIError.forbidden();
@@ -151,6 +151,10 @@ class HomeAPIClient {
 
     async getDataset(datasetId: string): Promise<Dataset> {
         return this.request(`datasets/${datasetId}`);
+    }
+
+    async getDatasetProfile(datasetId: string): Promise<any> {
+        return this.request(`files/${datasetId}/profile`);
     }
 
     // Deployments
