@@ -777,3 +777,62 @@ class LangtrainAPIClient {
 
 export const apiClient = LangtrainAPIClient.getInstance();
 
+// ---------------------------------------------------------------------------
+// Hardware & Local Training helpers (call the new server endpoints)
+// ---------------------------------------------------------------------------
+
+export interface HardwareInfo {
+    gpu_name: string;
+    vram_mb: number;
+    vram_gb: number;
+    tflops_fp16: number | null;
+    bandwidth_gbps: number | null;
+    compute_capability: string | null;
+    driver_version: string | null;
+    platform: 'nvidia' | 'apple_silicon' | 'cpu';
+    has_gpu: boolean;
+}
+
+export interface LocalJobResponse {
+    job_id: string;
+    status: string;
+    mode: string;
+    hardware: HardwareInfo;
+    stream_url: string;
+    log_channel: string;
+}
+
+export async function detectHardware(): Promise<HardwareInfo> {
+    const url = `${API_CONFIG.apiURL}/hardware/detect`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Hardware detection failed');
+    return res.json();
+}
+
+export async function startLocalJob(opts: {
+    base_model: string;
+    dataset_path: string;
+    config?: Record<string, unknown>;
+    callback_url?: string;
+}): Promise<LocalJobResponse> {
+    const url = `${API_CONFIG.apiURL}/training/jobs/local`;
+    const token = localStorage.getItem('langtrain_auth_token');
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(opts),
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail?.message || 'Failed to start local job');
+    }
+    return res.json();
+}
+
+export function openJobLogStream(jobId: string): WebSocket {
+    const base = API_CONFIG.apiURL.replace(/^http/, 'ws');
+    return new WebSocket(`${base}/training/jobs/local/${jobId}/stream`);
+}

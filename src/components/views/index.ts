@@ -4,6 +4,7 @@ export { PlaceholderView } from './PlaceholderView';
 export { ProjectsView } from './ProjectsView';
 export { DatasetsView } from './DatasetsView';
 export { ModelsView } from './ModelsView';
+export { ServingView } from './ServingView';
 export { TrainingView } from './TrainingView';
 export { AnalyticsView } from './AnalyticsView';
 export { SettingsView } from './SettingsView';

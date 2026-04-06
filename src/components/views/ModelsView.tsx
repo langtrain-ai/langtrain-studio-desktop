@@ -1,6 +1,6 @@
 /**
  * Models View Component
- * Browse and download base models for fine-tuning
+ * Unified Model Registry: Manage Local Vault and Remote Hub models like Ollama.
  */
 
 import { useState, useEffect } from 'react';
@@ -9,15 +9,70 @@ import {
     Download,
     Search,
     Filter,
-    ExternalLink,
+    HardDrive,
+    Network,
     Cpu,
     Layers,
     Zap,
-    CheckCircle,
+    Play,
+    Trash2,
+    Database,
     Clock
 } from 'lucide-react';
 import { apiClient, ModelInfo } from '../../services/api';
 import './ModelsView.css';
+
+// ============================================================================
+// Types & Mock Data for Local Registry
+// ============================================================================
+
+interface LocalModel {
+    id: string;
+    registryTag: string; // e.g. "llama3:8b-instruct-q4_K_M"
+    format: 'GGUF' | 'Safetensors' | 'PyTorch';
+    quantization: string;
+    sizeBytes: number;
+    parameters: number;
+    addedAt: string;
+    status: 'idle' | 'serving';
+}
+
+const MOCK_LOCAL_VAULT: LocalModel[] = [
+    {
+        id: 'loc-1',
+        registryTag: 'llama3:8b-instruct-q4_K_M',
+        format: 'GGUF',
+        quantization: '4-bit INT',
+        sizeBytes: 4.7 * 1024 * 1024 * 1024,
+        parameters: 8e9,
+        addedAt: '2 days ago',
+        status: 'idle'
+    },
+    {
+        id: 'loc-2',
+        registryTag: 'mixtral:8x7b-instruct-v0.1-q5_K_M',
+        format: 'GGUF',
+        quantization: '5-bit INT',
+        sizeBytes: 32.2 * 1024 * 1024 * 1024,
+        parameters: 47e9,
+        addedAt: '1 week ago',
+        status: 'serving'
+    },
+    {
+        id: 'loc-3',
+        registryTag: 'finetuned-customer-support.safetensors',
+        format: 'Safetensors',
+        quantization: 'FP16',
+        sizeBytes: 15.0 * 1024 * 1024 * 1024,
+        parameters: 7e9,
+        addedAt: 'Just now',
+        status: 'idle'
+    }
+];
+
+// ============================================================================
+// Formatting
+// ============================================================================
 
 function formatParams(params?: number): string {
     if (!params) return 'N/A';
@@ -32,188 +87,170 @@ function formatSize(bytes?: number): string {
     return `${gb.toFixed(1)} GB`;
 }
 
-interface ModelCardProps {
-    model: ModelInfo;
-    onDownload: (id: string) => void;
-}
-
-function ModelCard({ model, onDownload }: ModelCardProps) {
-    const [isDownloading, setIsDownloading] = useState(false);
-
-    async function handleDownload() {
-        setIsDownloading(true);
-        await onDownload(model.id);
-        setIsDownloading(false);
-    }
-
-    return (
-        <div className="model-card">
-            <div className="model-card__header">
-                <div className="model-card__icon">
-                    <Box size={24} />
-                </div>
-                <div className="model-card__badges">
-                    {model.supportsFinetuning && (
-                        <span className="badge badge--success">
-                            <Zap size={10} />
-                            Fine-tune Ready
-                        </span>
-                    )}
-                </div>
-            </div>
-
-            <div className="model-card__body">
-                <h3 className="model-card__name">{model.name}</h3>
-                <p className="model-card__description">
-                    {model.description || 'A powerful language model for fine-tuning.'}
-                </p>
-
-                <div className="model-card__specs">
-                    <div className="spec-item">
-                        <Cpu size={14} />
-                        <span className="spec-label">Parameters</span>
-                        <span className="spec-value">{formatParams(model.parameters)}</span>
-                    </div>
-                    <div className="spec-item">
-                        <Layers size={14} />
-                        <span className="spec-label">Context</span>
-                        <span className="spec-value">{model.contextLength?.toLocaleString() || '4096'}</span>
-                    </div>
-                    <div className="spec-item">
-                        <Download size={14} />
-                        <span className="spec-label">Size</span>
-                        <span className="spec-value">{formatSize(model.sizeBytes)}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="model-card__footer">
-                <button className="button button--secondary">
-                    <ExternalLink size={14} />
-                    Details
-                </button>
-                <button
-                    className="button button--primary"
-                    onClick={handleDownload}
-                    disabled={isDownloading}
-                >
-                    {isDownloading ? (
-                        <>
-                            <Clock size={14} className="spin" />
-                            Downloading...
-                        </>
-                    ) : (
-                        <>
-                            <Download size={14} />
-                            Download
-                        </>
-                    )}
-                </button>
-            </div>
-        </div>
-    );
-}
+// ============================================================================
+// Main Component
+// ============================================================================
 
 export function ModelsView() {
-    const [models, setModels] = useState<ModelInfo[]>([]);
+    const [activeTab, setActiveTab] = useState<'vault'|'hub'>('vault');
+    const [hubModels, setHubModels] = useState<ModelInfo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterFinetune, setFilterFinetune] = useState(false);
 
     useEffect(() => {
-        loadModels();
-    }, []);
+        if (activeTab === 'hub') {
+            loadHubModels();
+        } else {
+            setIsLoading(false); // Mock instant load for local
+        }
+    }, [activeTab]);
 
-    async function loadModels() {
+    async function loadHubModels() {
         try {
             setIsLoading(true);
             const response = await apiClient.listModels();
-            setModels(response.data);
+            setHubModels(response.data);
         } catch (err) {
             console.error('Failed to load models:', err);
-            setModels([]);
+            setHubModels([]);
         } finally {
             setIsLoading(false);
         }
     }
 
-    async function handleDownload(id: string) {
-        console.log('Download model:', id);
-        // Simulate download
-        await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-
-    const filteredModels = models.filter(m => {
-        const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (m.description?.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesFilter = !filterFinetune || m.supportsFinetuning;
-        return matchesSearch && matchesFilter;
-    });
-
     return (
-        <div className="models-view">
-            {/* Header */}
-            <div className="models-view__header">
-                <div className="models-view__title-section">
-                    <h1 className="models-view__title">Models</h1>
-                    <p className="models-view__subtitle">Browse and download base models for fine-tuning</p>
+        <div className="models-view" style={{ backgroundColor: '#09090b', minHeight: '100%', padding: '32px' }}>
+            {/* Standard Header with Registry Switcher */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+                <div>
+                    <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'white', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Database size={28} className="text-accent-purple" />
+                        Model Registry
+                    </h1>
+                    <p style={{ color: '#a1a1aa', margin: 0, fontSize: '14px' }}>Manage local foundation weights, adapters, and pull from standard inference Hubs.</p>
                 </div>
-            </div>
-
-            {/* Stats */}
-            <div className="models-view__stats">
-                <div className="stat-pill">
-                    <CheckCircle size={14} />
-                    <span>{models.filter(m => m.supportsFinetuning).length} Fine-tune Ready</span>
-                </div>
-                <div className="stat-pill">
-                    <Box size={14} />
-                    <span>{models.length} Total Models</span>
+                
+                {/* Custom Tech Tab Switcher */}
+                <div style={{ display: 'flex', background: '#18181b', padding: '4px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                    <button 
+                        onClick={() => setActiveTab('vault')}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
+                            background: activeTab === 'vault' ? '#27272a' : 'transparent',
+                            color: activeTab === 'vault' ? '#fff' : '#a1a1aa',
+                            boxShadow: activeTab === 'vault' ? '0 1px 3px rgba(0,0,0,0.3)' : 'none'
+                        }}
+                    >
+                        <HardDrive size={16} /> Local Vault
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('hub')}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
+                            background: activeTab === 'hub' ? '#27272a' : 'transparent',
+                            color: activeTab === 'hub' ? '#fff' : '#a1a1aa',
+                            boxShadow: activeTab === 'hub' ? '0 1px 3px rgba(0,0,0,0.3)' : 'none'
+                        }}
+                    >
+                        <Network size={16} /> Remote Hub
+                    </button>
                 </div>
             </div>
 
             {/* Toolbar */}
-            <div className="models-view__toolbar">
-                <div className="search-box">
-                    <Search size={16} />
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', background: '#18181b', padding: '0 16px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                    <Search size={18} color="#a1a1aa" />
                     <input
                         type="text"
-                        placeholder="Search models..."
+                        placeholder="Search models or tags (e.g., llama3, gguf, safetensors)..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{ background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: '14px', width: '100%', padding: '12px 0' }}
                     />
                 </div>
-                <button
-                    className={`filter-button ${filterFinetune ? 'filter-button--active' : ''}`}
-                    onClick={() => setFilterFinetune(!filterFinetune)}
-                >
-                    <Filter size={16} />
-                    Fine-tune Ready
+                <button style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#18181b', border: '1px solid #27272a', padding: '0 20px', borderRadius: '8px', color: '#a1a1aa', cursor: 'pointer' }}>
+                    <Filter size={16} /> Filters
                 </button>
             </div>
 
-            {/* Model Grid */}
-            <div className="models-view__content">
-                {isLoading ? (
-                    <div className="models-view__loading">Loading models...</div>
-                ) : filteredModels.length === 0 ? (
-                    <div className="models-view__empty">
-                        <Box size={48} className="empty-icon" />
-                        <h3>No models found</h3>
-                        <p>Try adjusting your search or filters</p>
-                    </div>
-                ) : (
-                    <div className="models-view__grid">
-                        {filteredModels.map(model => (
-                            <ModelCard
-                                key={model.id}
-                                model={model}
-                                onDownload={handleDownload}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
+            {/* Tab content rendering */}
+            {activeTab === 'vault' ? (
+                <div style={{ display: 'grid', gap: '16px' }}>
+                    {MOCK_LOCAL_VAULT.map(localInfo => (
+                        <div key={localInfo.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#18181b', padding: '24px', borderRadius: '12px', border: '1px solid #27272a' }}>
+                            {/* Left Meta Group */}
+                            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Box size={24} color="#a855f7" />
+                                </div>
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '18px', color: '#fff', fontFamily: 'monospace' }}>{localInfo.registryTag}</h3>
+                                        <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '12px', background: '#27272a', color: '#a1a1aa', border: '1px solid #3f3f46' }}>
+                                            {localInfo.format}
+                                        </span>
+                                        {localInfo.status === 'serving' && (
+                                            <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '12px', background: 'rgba(0,255,133,0.1)', color: '#00FF85', border: '1px solid rgba(0,255,133,0.2)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <span style={{ width: '6px', height: '6px', background: '#00FF85', borderRadius: '50%' }}></span> Serving
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '24px', color: '#a1a1aa', fontSize: '13px' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Cpu size={14}/> {formatParams(localInfo.parameters)} Params</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Layers size={14}/> {localInfo.quantization}</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><HardDrive size={14}/> {formatSize(localInfo.sizeBytes)}</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14}/> Added {localInfo.addedAt}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Vault action tools */}
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#a1a1aa', background: 'transparent', border: 'none', padding: '8px 12px', borderRadius: '6px' }} className="hover:bg-zinc-800">
+                                    <Trash2 size={16} />
+                                </button>
+                                {localInfo.status === 'serving' ? (
+                                    <button style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'transparent', color: '#fff', border: '1px solid #3f3f46', padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}>
+                                        Manage API
+                                    </button>
+                                ) : (
+                                    <button style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: '#fff', color: '#000', border: 'none', padding: '8px 20px', borderRadius: '6px', fontWeight: 600 }}>
+                                        <Play size={14} fill="currentColor" /> Serve (vLLM)
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+                    {isLoading ? (
+                        <div style={{ color: '#a1a1aa' }}>Fetching remote models via Registry API...</div>
+                    ) : (
+                        hubModels.map(model => (
+                            <div key={model.id} style={{ display: 'flex', flexDirection: 'column', background: '#18181b', padding: '24px', borderRadius: '12px', border: '1px solid #27272a' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                                    <h3 style={{ margin: 0, fontSize: '18px', color: '#fff', fontWeight: 600 }}>{model.name}</h3>
+                                    {model.supportsFinetuning && <Zap size={16} color="#fbbf24" />}
+                                </div>
+                                <p style={{ color: '#a1a1aa', fontSize: '14px', lineHeight: 1.5, marginBottom: '24px', flex: 1 }}>{model.description}</p>
+                                
+                                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a1a1aa', fontSize: '12px', marginBottom: '24px', background: '#27272a', padding: '12px', borderRadius: '8px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}><span>Params</span><strong style={{ color: '#fff' }}>{formatParams(model.parameters)}</strong></div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}><span>Context</span><strong style={{ color: '#fff' }}>{model.contextLength?.toLocaleString() || '4k'}</strong></div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}><span>Download</span><strong style={{ color: '#fff' }}>{formatSize(model.sizeBytes)}</strong></div>
+                                </div>
+                                <button style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'transparent', color: '#fff', border: '1px solid #3f3f46', padding: '10px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}>
+                                    <Download size={16} /> Pull Model
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
         </div>
     );
 }

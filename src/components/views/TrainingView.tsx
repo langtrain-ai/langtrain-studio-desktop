@@ -12,10 +12,13 @@ import {
     Cpu,
     Loader,
     CheckCircle,
-    TrendingDown
+    TrendingDown,
+    BrainCircuit
 } from 'lucide-react';
 import { apiClient, FineTuneJob } from '../../services/api';
 import { ConfigurationWidget, defaultConfig, TrainingConfig } from '../common/ConfigurationWidget';
+import SystemPerformanceMonitor from '../dashboard/SystemPerformanceMonitor';
+import { HardwareEstimator } from '../dashboard/HardwareEstimator';
 import './TrainingView.css';
 
 interface JobRowProps {
@@ -115,7 +118,7 @@ export function TrainingView() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedJob, setSelectedJob] = useState<FineTuneJob | null>(null);
 
-    const [activeTab, setActiveTab] = useState<'metrics' | 'logs'>('metrics');
+    const [activeTab, setActiveTab] = useState<'metrics' | 'logs' | 'estimator'>('estimator');
     const [showConfig, setShowConfig] = useState(false);
     const [newJobConfig, setNewJobConfig] = useState<TrainingConfig>(defaultConfig);
 
@@ -270,6 +273,13 @@ export function TrainingView() {
                         {/* Tabs */}
                         <div className="detail-tabs">
                             <button
+                                className={`tab-button ${activeTab === 'estimator' ? 'tab-button--active' : ''}`}
+                                onClick={() => setActiveTab('estimator')}
+                            >
+                                <BrainCircuit size={14} />
+                                Hardware Estimator
+                            </button>
+                            <button
                                 className={`tab-button ${activeTab === 'metrics' ? 'tab-button--active' : ''}`}
                                 onClick={() => setActiveTab('metrics')}
                             >
@@ -286,13 +296,12 @@ export function TrainingView() {
                         </div>
 
                         {/* Tab Content */}
-                        <div className="detail-content">
-                            {activeTab === 'metrics' ? (
-                                <div className="metrics-chart">
-                                    <div className="chart-placeholder">
-                                        <Activity size={48} />
-                                        <span>Training metrics visualization</span>
-                                    </div>
+                        <div className="detail-content" style={{ padding: activeTab === 'estimator' ? '16px' : undefined }}>
+                            {activeTab === 'estimator' ? (
+                                <HardwareEstimator />
+                            ) : activeTab === 'metrics' ? (
+                                <div className="metrics-chart" style={{ padding: '0', display: 'flex', flexDirection: 'column' }}>
+                                    <SystemPerformanceMonitor />
                                 </div>
                             ) : (
                                 <div className="logs-container">

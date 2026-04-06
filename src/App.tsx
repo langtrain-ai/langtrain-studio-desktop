@@ -12,6 +12,7 @@ import {
   ProjectsView,
   DatasetsView,
   ModelsView,
+  ServingView,
   TrainingView,
   AnalyticsView,
   SettingsView,
@@ -67,6 +68,7 @@ function AppRoutes() {
         <Route path="/datasets" element={<DatasetsView />} />
         <Route path="/curation" element={<CurationView />} />
         <Route path="/models" element={<ModelsView />} />
+        <Route path="/serving" element={<ServingView />} />
         <Route path="/training" element={<TrainingView />} />
         <Route path="/analytics" element={<AnalyticsView />} />
         <Route path="/settings" element={<SettingsView />} />
