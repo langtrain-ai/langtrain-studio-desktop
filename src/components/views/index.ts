@@ -1,6 +1,5 @@
 export { LoginView } from './LoginView';
 export { DashboardView } from './DashboardView';
-export { PlaceholderView } from './PlaceholderView';
 export { ProjectsView } from './ProjectsView';
 export { DatasetsView } from './DatasetsView';
 export { ModelsView } from './ModelsView';
@@ -10,3 +9,6 @@ export { AnalyticsView } from './AnalyticsView';
 export { SettingsView } from './SettingsView';
 export { AgentsView } from './AgentsView';
 export { CurationView } from './CurationView';
+export { LocalModelsView } from './LocalModelsView';
+export { CoWorkView } from './CoWorkView';
+export { GuardrailsView } from './GuardrailsView';

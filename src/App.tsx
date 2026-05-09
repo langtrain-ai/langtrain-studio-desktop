@@ -8,7 +8,6 @@ import { MainLayout } from './components/layout';
 import {
   LoginView,
   DashboardView,
-  PlaceholderView,
   ProjectsView,
   DatasetsView,
   ModelsView,
@@ -17,7 +16,9 @@ import {
   AnalyticsView,
   SettingsView,
   AgentsView,
-  CurationView
+  CurationView,
+  LocalModelsView,
+  CoWorkView
 } from './components/views';
 import { useAuth } from './services/auth';
 import './styles/theme.css';
@@ -72,7 +73,8 @@ function AppRoutes() {
         <Route path="/training" element={<TrainingView />} />
         <Route path="/analytics" element={<AnalyticsView />} />
         <Route path="/settings" element={<SettingsView />} />
-        <Route path="/documentation" element={<PlaceholderView title="Documentation" description="Access API documentation and guides" />} />
+        <Route path="/local-models" element={<LocalModelsView />} />
+        <Route path="/co-work" element={<CoWorkView />} />
       </Route>
 
       {/* Catch-all redirect */}

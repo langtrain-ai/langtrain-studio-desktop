@@ -10,7 +10,13 @@ export const sidebarItems = [
     { id: 'analytics', title: 'Analytics', icon: 'LineChart', path: '/analytics' },
 ] as const;
 
+export const offlineItems = [
+    { id: 'local-models', title: 'Local Models', icon: 'HardDrive', path: '/local-models' },
+    { id: 'co-work', title: 'Co-Work', icon: 'BrainCircuit', path: '/co-work' },
+] as const;
+
 export const systemItems = [
     { id: 'settings', title: 'Settings', icon: 'Settings', path: '/settings' },
     { id: 'docs', title: 'Documentation', icon: 'BookOpen', path: '/documentation' },
 ] as const;
+

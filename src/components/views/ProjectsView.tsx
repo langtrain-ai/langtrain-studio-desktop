@@ -15,7 +15,7 @@ import {
     AlertCircle,
     Loader
 } from 'lucide-react';
-import { apiClient, FineTuneJob } from '../../services/api';
+import { api, FineTuneJob } from '../../services/api';
 import './ProjectsView.css';
 
 type ProjectStatus = 'running' | 'completed' | 'failed' | 'pending' | 'cancelled';
@@ -160,7 +160,7 @@ export function ProjectsView() {
         try {
             setIsLoading(true);
             setError(null);
-            const response = await apiClient.listFineTuningJobs();
+            const response = await api.listFineTuningJobs();
             setProjects(response.data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load projects');
@@ -171,7 +171,7 @@ export function ProjectsView() {
 
     async function handleCancelJob(id: string) {
         try {
-            await apiClient.cancelFineTuningJob(id);
+            await api.cancelFineTuningJob(id);
             loadProjects();
         } catch (err) {
             console.error('Failed to cancel job:', err);

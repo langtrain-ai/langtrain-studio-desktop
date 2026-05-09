@@ -4,6 +4,7 @@
  */
 
 import { settings } from '../lib/settings';
+import { secureStorage } from '../lib/storage';
 
 // API Configuration
 export const API_CONFIG = {
@@ -286,6 +287,14 @@ export interface UsageResponse {
     limits: Record<string, number>;
 }
 
+export interface UsageResponse {
+    tokens: { used: number; limit: number; percentage: number; unlimited: boolean };
+    finetuneJobs: { used: number; limit: number; percentage: number; unlimited: boolean };
+    agentRuns: { used: number; limit: number; percentage: number; unlimited: boolean };
+    period: { start: string; end?: string; lastUpdated?: string };
+    limits: Record<string, number>;
+}
+
 export interface PlanResponse {
     plan: {
         id?: string;
@@ -305,17 +314,38 @@ export interface PlanResponse {
     };
 }
 
+export interface UsageSummary {
+    periodDays: number;
+    apiCalls: number;
+    totalCost: number;
+    startDate: string;
+    endDate: string;
+}
+
+export interface Deployment {
+    id: string;
+    name: string;
+    status: string;
+    endpoint?: string;
+    createdAt?: string;
+}
+
+// Aliases for Home API compatibility
+export type TrainingJob = FineTuneJob;
+export type Agent = AgentInfo;
+export type Dataset = DatasetInfo;
+
 // API Client Class
-class LangtrainAPIClient {
-    private static instance: LangtrainAPIClient;
+class APIClient {
+    private static instance: APIClient;
 
     private constructor() { }
 
-    static getInstance(): LangtrainAPIClient {
-        if (!LangtrainAPIClient.instance) {
-            LangtrainAPIClient.instance = new LangtrainAPIClient();
+    static getInstance(): APIClient {
+        if (!APIClient.instance) {
+            APIClient.instance = new APIClient();
         }
-        return LangtrainAPIClient.instance;
+        return APIClient.instance;
     }
 
     private async request<T>(
@@ -390,8 +420,8 @@ class LangtrainAPIClient {
         return this.request(`models/${id}`, { requiresAuth: false });
     }
 
-    // Datasets
-    async listDatasets(workspaceId: string): Promise<DatasetsResponse> {
+    // Datasets (Workspace Scoped)
+    async listWorkspaceDatasets(workspaceId: string): Promise<DatasetsResponse> {
         return this.request(`files?workspace_id=${workspaceId}`);
     }
 
@@ -456,8 +486,8 @@ class LangtrainAPIClient {
         return this.request(`fine-tuning/jobs/${id}/cancel`, { method: 'POST' });
     }
 
-    // Agents
-    async listAgents(workspaceId: string): Promise<AgentsResponse> {
+    // Agents (Workspace Scoped)
+    async listWorkspaceAgents(workspaceId: string): Promise<AgentsResponse> {
         return this.request(`workspaces/${workspaceId}/agents`);
     }
 
@@ -773,9 +803,80 @@ class LangtrainAPIClient {
 
         return response.json();
     }
+
+    // Training
+    async listTrainingJobs(params?: { limit?: number; offset?: number; status?: string }): Promise<{ data: TrainingJob[] }> {
+        const query = new URLSearchParams();
+        if (params?.limit) query.set('limit', String(params.limit));
+        if (params?.offset) query.set('offset', String(params.offset));
+        if (params?.status) query.set('status', params.status);
+        return this.request(`training?${query.toString()}`);
+    }
+
+    async getTrainingJob(jobId: string): Promise<TrainingJob> {
+        return this.request(`training/${jobId}`);
+    }
+
+    // Agents
+    async listAgents(params?: { limit?: number; offset?: number }): Promise<{ data: Agent[] }> {
+        const query = new URLSearchParams();
+        if (params?.limit) query.set('limit', String(params.limit));
+        if (params?.offset) query.set('offset', String(params.offset));
+        return this.request(`agents?${query.toString()}`);
+    }
+
+    async getAgent(agentId: string): Promise<Agent> {
+        return this.request(`agents/${agentId}`);
+    }
+
+    // Datasets
+    async listDatasets(params?: { limit?: number; offset?: number }): Promise<{ data: Dataset[] }> {
+        const query = new URLSearchParams();
+        if (params?.limit) query.set('limit', String(params.limit));
+        if (params?.offset) query.set('offset', String(params.offset));
+        return this.request(`datasets?${query.toString()}`);
+    }
+
+    async getDataset(datasetId: string): Promise<Dataset> {
+        return this.request(`datasets/${datasetId}`);
+    }
+
+    async getDatasetProfile(datasetId: string): Promise<any> {
+        return this.request(`files/${datasetId}/profile`);
+    }
+
+    // Deployments
+    async listDeployments(params?: { limit?: number; offset?: number }): Promise<{ data: Deployment[] }> {
+        const query = new URLSearchParams();
+        if (params?.limit) query.set('limit', String(params.limit));
+        if (params?.offset) query.set('offset', String(params.offset));
+        return this.request(`deployments?${query.toString()}`);
+    }
+
+    async getDeployment(deploymentId: string): Promise<Deployment> {
+        return this.request(`deployments/${deploymentId}`);
+    }
+
+    // Usage
+    async getUsageSummary(days: number = 30): Promise<UsageSummary> {
+        return this.request(`usage?days=${days}`);
+    }
+
+    async getTransactions(limit: number = 20): Promise<{ data: Array<{ id: string; amount: number; status: string; createdAt?: string }> }> {
+        return this.request(`usage/transactions?limit=${limit}`);
+    }
+
+    // Settings
+    async getProfile(): Promise<UserProfile> {
+        return this.request('settings/profile');
+    }
+
+    async updateProfile(data: { fullName?: string; avatarUrl?: string }): Promise<{ success: boolean }> {
+        return this.request('settings/profile', { method: 'PATCH', body: data });
+    }
 }
 
-export const apiClient = LangtrainAPIClient.getInstance();
+export const api = APIClient.getInstance();
 
 // ---------------------------------------------------------------------------
 // Hardware & Local Training helpers (call the new server endpoints)

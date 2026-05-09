@@ -15,7 +15,7 @@ import {
     TrendingDown,
     BrainCircuit
 } from 'lucide-react';
-import { apiClient, FineTuneJob } from '../../services/api';
+import { api, FineTuneJob } from '../../services/api';
 import { ConfigurationWidget, defaultConfig, TrainingConfig } from '../common/ConfigurationWidget';
 import SystemPerformanceMonitor from '../dashboard/SystemPerformanceMonitor';
 import { HardwareEstimator } from '../dashboard/HardwareEstimator';
@@ -130,7 +130,7 @@ export function TrainingView() {
 
     async function loadJobs() {
         try {
-            const response = await apiClient.listFineTuningJobs();
+            const response = await api.listFineTuningJobs();
             setJobs(response.data);
             if (response.data.length > 0 && !selectedJob) {
                 setSelectedJob(response.data[0]);
@@ -145,7 +145,7 @@ export function TrainingView() {
 
     async function handleCancelJob(id: string) {
         try {
-            await apiClient.cancelFineTuningJob(id);
+            await api.cancelFineTuningJob(id);
             loadJobs();
         } catch (err) {
             console.error('Failed to cancel job:', err);
@@ -154,7 +154,7 @@ export function TrainingView() {
 
     async function handleStartJob() {
         console.log("Starting job with config:", newJobConfig);
-        // Here we would call apiClient.createJob(newJobConfig)
+        // Here we would call api.createJob(newJobConfig)
         setShowConfig(false);
         // Simulate job creation
         setTimeout(loadJobs, 1000);

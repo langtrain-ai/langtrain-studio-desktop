@@ -19,7 +19,7 @@ import {
     Database,
     Clock
 } from 'lucide-react';
-import { apiClient, ModelInfo } from '../../services/api';
+import { api, ModelInfo } from '../../services/api';
 import './ModelsView.css';
 
 // ============================================================================
@@ -108,7 +108,7 @@ export function ModelsView() {
     async function loadHubModels() {
         try {
             setIsLoading(true);
-            const response = await apiClient.listModels();
+            const response = await api.listModels();
             setHubModels(response.data);
         } catch (err) {
             console.error('Failed to load models:', err);

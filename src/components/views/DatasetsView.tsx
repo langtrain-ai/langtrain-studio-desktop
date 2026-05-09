@@ -19,7 +19,7 @@ import {
     Loader,
     RefreshCw
 } from 'lucide-react';
-import { apiClient, DatasetInfo } from '../../services/api';
+import { api, DatasetInfo } from '../../services/api';
 import { useToast } from '../common';
 import './DatasetsView.css';
 
@@ -120,7 +120,7 @@ export function DatasetsView() {
     async function loadDatasets() {
         try {
             setIsLoading(true);
-            const response = await apiClient.listDatasets('default');
+            const response = await api.listDatasets('default');
             setDatasets(response.data);
         } catch (err) {
             console.error('Failed to load datasets:', err instanceof Error ? err.message : 'Unknown error');
@@ -134,7 +134,7 @@ export function DatasetsView() {
     async function handleDelete(id: string) {
         try {
             setDeletingId(id);
-            await apiClient.deleteDataset(id);
+            await api.deleteDataset(id);
             setDatasets(prev => prev.filter(d => d.id !== id));
             toast.success('Dataset deleted successfully');
         } catch (err) {
@@ -165,7 +165,7 @@ export function DatasetsView() {
             const file = validFiles[i];
             try {
                 setUploadProgress(((i) / validFiles.length) * 100);
-                const newDataset = await apiClient.uploadDataset(file);
+                const newDataset = await api.uploadDataset(file);
                 setDatasets(prev => [newDataset, ...prev]);
                 toast.success(`Uploaded ${file.name}`);
             } catch (err) {

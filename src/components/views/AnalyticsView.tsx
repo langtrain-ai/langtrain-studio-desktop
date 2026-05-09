@@ -16,7 +16,7 @@ import {
     ArrowDownRight,
     Loader
 } from 'lucide-react';
-import { apiClient, UsageResponse, FineTuneJob } from '../../services/api';
+import { api, UsageResponse, FineTuneJob } from '../../services/api';
 import './AnalyticsView.css';
 
 interface StatCardProps {
@@ -137,8 +137,8 @@ export function AnalyticsView() {
         try {
             setIsLoading(true);
             const [usageData, jobsData] = await Promise.all([
-                apiClient.getUsage('default'),
-                apiClient.listFineTuningJobs(),
+                api.getUsage('default'),
+                api.listFineTuningJobs(),
             ]);
             setUsage(usageData);
             setJobs(jobsData.data);

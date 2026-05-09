@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Server, RefreshCw, Activity, AlertCircle, Loader } from 'lucide-react';
-import { apiClient, FineTuneJob, UsageResponse } from '../../services/api';
+import { api, FineTuneJob, UsageResponse } from '../../services/api';
 import './DashboardView.css';
 import MetricsGrid from '../dashboard/MetricsGrid';
 
@@ -116,9 +116,9 @@ export function DashboardView() {
         try {
             // Fetch all data in parallel
             const [jobsData, usageData, healthData] = await Promise.allSettled([
-                apiClient.listFineTuningJobs(),
-                apiClient.getUsage('default'),
-                apiClient.healthCheck(),
+                api.listFineTuningJobs(),
+                api.getUsage('default'),
+                api.healthCheck(),
             ]);
 
             // Process jobs

@@ -18,9 +18,11 @@ import {
     Bot,
     Sparkles,
     Server,
+    HardDrive,
+    BrainCircuit,
     type LucideIcon,
 } from 'lucide-react';
-import { sidebarItems, systemItems } from '../../lib/design';
+import { sidebarItems, systemItems, offlineItems } from '../../lib/tokens';
 import { useAuth } from '../../services/auth';
 import './Sidebar.css';
 
@@ -37,6 +39,8 @@ const iconMap: Record<string, LucideIcon> = {
     Bot,
     Sparkles,
     Server,
+    HardDrive,
+    BrainCircuit,
 };
 
 interface SidebarItemProps {
@@ -99,6 +103,15 @@ export function Sidebar() {
                 <div className="sidebar__section">
                     <span className="sidebar__section-title">SYSTEM</span>
                     {systemItems.map((item) => (
+                        <SidebarItem key={item.id} {...item} />
+                    ))}
+                </div>
+
+                <div className="sidebar__divider" />
+
+                <div className="sidebar__section">
+                    <span className="sidebar__section-title">OFFLINE</span>
+                    {offlineItems.map((item) => (
                         <SidebarItem key={item.id} {...item} />
                     ))}
                 </div>

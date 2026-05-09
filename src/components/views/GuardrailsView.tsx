@@ -15,9 +15,9 @@ import {
     X,
     Loader2,
 } from "lucide-react";
-import { apiClient, BiasRule, BiasRuleCreate, BiasImpactAnalysis } from "../../services/api";
+import { api, BiasRule, BiasRuleCreate, BiasImpactAnalysis } from "../../services/api";
 
-interface BiasRulesEditorProps {
+interface GuardrailsViewProps {
     workspaceId: string;
     datasetFile?: File;
     onRulesChange?: (rules: BiasRule[]) => void;
@@ -38,12 +38,12 @@ const ACTION_COLORS: Record<string, string> = {
     downweight: "border-purple-500/30 bg-purple-500/10",
 };
 
-export function BiasRulesEditor({
+export function GuardrailsView({
     workspaceId,
     datasetFile,
     onRulesChange,
     onAnalysisComplete,
-}: BiasRulesEditorProps) {
+}: GuardrailsViewProps) {
     const [rules, setRules] = useState<BiasRule[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
@@ -71,7 +71,7 @@ export function BiasRulesEditor({
         try {
             setIsLoading(true);
             setError(null);
-            const data = await apiClient.listBiasRules(workspaceId);
+            const data = await api.listBiasRules(workspaceId);
             setRules(data);
             onRulesChange?.(data);
         } catch (err: any) {
@@ -104,7 +104,7 @@ export function BiasRulesEditor({
 
         try {
             setIsCreating(true);
-            const created = await apiClient.createBiasRule(ruleData);
+            const created = await api.createBiasRule(ruleData);
             const updated = [...rules, created];
             setRules(updated);
             onRulesChange?.(updated);
@@ -118,7 +118,7 @@ export function BiasRulesEditor({
 
     const deleteRule = async (ruleId: string) => {
         try {
-            await apiClient.deleteBiasRule(ruleId);
+            await api.deleteBiasRule(ruleId);
             const updated = rules.filter((r) => r.id !== ruleId);
             setRules(updated);
             onRulesChange?.(updated);
@@ -129,7 +129,7 @@ export function BiasRulesEditor({
 
     const toggleRule = async (ruleId: string, enabled: boolean) => {
         try {
-            await apiClient.updateBiasRule(ruleId, { enabled });
+            await api.updateBiasRule(ruleId, { enabled });
             const updated = rules.map((r) => (r.id === ruleId ? { ...r, enabled } : r));
             setRules(updated);
             onRulesChange?.(updated);
@@ -144,7 +144,7 @@ export function BiasRulesEditor({
         try {
             setIsAnalyzing(true);
             const enabledRuleIds = rules.filter((r) => r.enabled).map((r) => r.id);
-            const result = await apiClient.analyzeBiasImpact(datasetFile, enabledRuleIds);
+            const result = await api.analyzeBiasImpact(datasetFile, enabledRuleIds);
             setAnalysis(result);
             onAnalysisComplete?.(result);
         } catch (err: any) {
@@ -392,4 +392,4 @@ export function BiasRulesEditor({
     );
 }
 
-export default BiasRulesEditor;
+export default GuardrailsView;

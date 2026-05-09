@@ -41,7 +41,7 @@ interface DatasetProfile {
     profiles: RowProfile[];
 }
 
-import { homeApi } from '../../services/homeApi';
+import { api } from '../../services/api';
 
 // Loss histogram component
 function LossHistogram({ profiles, minThreshold, maxThreshold }: {
@@ -113,7 +113,7 @@ export function CurationView() {
 
     // Load available datasets
     useEffect(() => {
-        homeApi.listDatasets().then(res => {
+        api.listDatasets().then(res => {
             if (res && res.data) {
                 setAvailableDatasets(res.data);
             }
@@ -131,7 +131,7 @@ export function CurationView() {
 
         setIsAnalyzing(true);
         try {
-            const data = await homeApi.getDatasetProfile(selectedFile);
+            const data = await api.getDatasetProfile(selectedFile);
             setProfile(data);
         } catch (e) {
             console.error("Failed profiling dataset", e);
