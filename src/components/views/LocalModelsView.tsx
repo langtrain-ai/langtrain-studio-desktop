@@ -12,7 +12,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
     Download, Trash2, Play, Square, HardDrive, Cpu, MonitorSmartphone,
-    Zap, AlertTriangle, CheckCircle, XCircle, Loader2, Shield, Crown
+    Zap, AlertTriangle, CheckCircle, XCircle, Loader2, Crown
 } from 'lucide-react';
 import {
     HardwareService, ModelManagerService, InferenceService, SubscriptionGate,
