@@ -7,8 +7,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
-    FolderOpen, File, ChevronRight, ChevronDown, Send, Bot,
-    User, Zap, Globe, Settings, Plus, X, Save, Loader2
+    File, Send, Bot,
+    User, Zap, Globe, Loader2
 } from 'lucide-react';
 import { InferenceService, SubscriptionGate, type ServerStatus, type ProAccessResult } from '../../services/local';
 import { api } from '../../services/api';
@@ -22,13 +22,6 @@ interface ChatMessage {
     source?: 'local' | 'remote';
 }
 
-interface FileNode {
-    name: string;
-    path: string;
-    isDir: boolean;
-    children?: FileNode[];
-    expanded?: boolean;
-}
 
 export function CoWorkView() {
     const [proAccess, setProAccess] = useState<ProAccessResult | null>(null);
@@ -38,8 +31,8 @@ export function CoWorkView() {
     const [sending, setSending] = useState(false);
     const [useLocal, setUseLocal] = useState(true);
     const [editorContent, setEditorContent] = useState('// Open a file or start typing...\n');
-    const [activeFile, setActiveFile] = useState<string | null>(null);
-    const [systemPrompt, setSystemPrompt] = useState(
+    const [activeFile] = useState<string | null>(null);
+    const [systemPrompt] = useState(
         'You are a helpful AI coding assistant. Help the user with their code. Be concise and provide working code snippets.'
     );
     const chatEndRef = useRef<HTMLDivElement>(null);
