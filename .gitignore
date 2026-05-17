@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Rust build artifacts (equivalent to DerivedData in Xcode)
+src-tauri/target/
+
+# Generated Tauri schemas
+src-tauri/gen/
+
+# macOS metadata
+.DS_Store
+
+# Tauri bundle outputs
+src-tauri/bundle/
+*.app
+*.dmg
+*.msi
+*.deb
+*.rpm
