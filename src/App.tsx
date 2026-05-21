@@ -18,7 +18,8 @@ import {
   AgentsView,
   CurationView,
   LocalModelsView,
-  CoWorkView
+  CoWorkView,
+  StudioView,
 } from './components/views';
 import { useAuth } from './services/auth';
 import './styles/theme.css';
@@ -74,6 +75,7 @@ function AppRoutes() {
         <Route path="/analytics" element={<AnalyticsView />} />
         <Route path="/settings" element={<SettingsView />} />
         <Route path="/local-models" element={<LocalModelsView />} />
+        <Route path="/studio" element={<StudioView />} />
         <Route path="/co-work" element={<CoWorkView />} />
       </Route>
 

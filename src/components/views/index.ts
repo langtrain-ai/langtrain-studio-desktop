@@ -12,3 +12,4 @@ export { CurationView } from './CurationView';
 export { LocalModelsView } from './LocalModelsView';
 export { CoWorkView } from './CoWorkView';
 export { GuardrailsView } from './GuardrailsView';
+export { StudioView } from './StudioView';

@@ -12,7 +12,8 @@ export const sidebarItems = [
 
 export const offlineItems = [
     { id: 'local-models', title: 'Local Models', icon: 'HardDrive', path: '/local-models' },
-    { id: 'co-work', title: 'Co-Work', icon: 'BrainCircuit', path: '/co-work' },
+    { id: 'studio', title: 'Studio', icon: 'BrainCircuit', path: '/studio' },
+    { id: 'co-work', title: 'Co-Work', icon: 'MessageSquare', path: '/co-work' },
 ] as const;
 
 export const systemItems = [
