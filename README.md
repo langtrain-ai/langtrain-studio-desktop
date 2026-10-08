@@ -52,11 +52,11 @@ Download the latest release for your platform:
 
 | Platform | Download |
 |----------|----------|
-| Windows (64-bit) | [Langtrain-Studio-Setup.exe](https://github.com/langtrain-ai/langtrain-studio-desktop/releases) |
-| Linux (AppImage) | [Langtrain-Studio.AppImage](https://github.com/langtrain-ai/langtrain-studio-desktop/releases) |
-| Linux (Debian) | [langtrain-studio.deb](https://github.com/langtrain-ai/langtrain-studio-desktop/releases) |
+| Windows (64-bit) | [Langtrain-Studio-Setup.exe](https://github.com/langtrain-ai/langtrain_studio_desktop/releases) |
+| Linux (AppImage) | [Langtrain-Studio.AppImage](https://github.com/langtrain-ai/langtrain_studio_desktop/releases) |
+| Linux (Debian) | [langtrain-studio.deb](https://github.com/langtrain-ai/langtrain_studio_desktop/releases) |
 
-> **macOS Users**: Please download the native Swift app from [langtrain-studio](https://github.com/langtrain-ai/langtrain-studio/releases) for the best experience on Apple Silicon and Intel Macs.
+> **macOS Users**: Please download the native Swift app from [langtrain-studio](https://github.com/langtrain-ai/langtrain_studio/releases) for the best experience on Apple Silicon and Intel Macs.
 
 
 ### Build from Source
@@ -73,7 +73,7 @@ Download the latest release for your platform:
 
 ```bash
 # Clone the repository
-git clone https://github.com/langtrain-ai/langtrain-studio-desktop.git
+git clone https://github.com/langtrain-ai/langtrain_studio_desktop.git
 cd langtrain-studio-desktop
 
 # Install dependencies
@@ -189,7 +189,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 - 📖 [Documentation](https://www.langtrain.xyz/docs)
 - 💬 [Discord Community](https://discord.gg/langtrain)
 - 📧 [Email Support](mailto:support@langtrain.xyz)
-- 🐛 [Issue Tracker](https://github.com/langtrain-ai/langtrain-studio-desktop/issues)
+- 🐛 [Issue Tracker](https://github.com/langtrain-ai/langtrain_studio_desktop/issues)
 
 ## License
 
