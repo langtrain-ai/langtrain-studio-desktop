@@ -65,7 +65,7 @@ jobs:
             - **Windows**: `.msi` or `.exe` installer
             - **Linux**: `.AppImage` or `.deb` package
             
-            *For macOS, please download the native Swift app from [langtrain-studio](https://github.com/langtrain-ai/langtrain-studio/releases)*
+            *For macOS, please download the native Swift app from [langtrain-studio](https://github.com/langtrain-ai/langtrain_studio/releases)*
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
