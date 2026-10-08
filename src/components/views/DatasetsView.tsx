@@ -120,7 +120,7 @@ export function DatasetsView() {
     async function loadDatasets() {
         try {
             setIsLoading(true);
-            const response = await api.listDatasets('default');
+            const response = await api.listDatasets();
             setDatasets(response.data);
         } catch (err) {
             console.error('Failed to load datasets:', err instanceof Error ? err.message : 'Unknown error');

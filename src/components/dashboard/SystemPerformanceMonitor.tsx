@@ -220,8 +220,6 @@ const SystemPerformanceMonitor: React.FC = () => {
   const [mode, setMode] = useState<MetricMode>('GPU');
   const metrics = useSystemMetrics();
 
-  const currentMetrics = mode === 'CPU' ? metrics.cpu : metrics.gpu;
-
   // CPU Gauges
   const cpuGauges: GaugeProps[] = [
     {

@@ -115,7 +115,7 @@ export function CurationView() {
     useEffect(() => {
         api.listDatasets().then(res => {
             if (res && res.data) {
-                setAvailableDatasets(res.data);
+                setAvailableDatasets(res.data.map(d => ({ id: d.id, name: d.filename })));
             }
         }).catch(err => {
             console.error("Failed to fetch datasets for curation", err);
