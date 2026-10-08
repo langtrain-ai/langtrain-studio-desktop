@@ -4,6 +4,7 @@
  */
 
 import { API_CONFIG, UserProfile } from './api';
+import { secureStorage } from '../lib/storage';
 
 // Auth State
 export interface AuthState {
