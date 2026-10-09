@@ -50,9 +50,12 @@ export class SettingsManager {
     }
 
     public getApiUrl(version: string = 'v1'): string {
-        // Ensure no trailing slash
-        const base = this.settings.apiBaseUrl.replace(/\/$/, "");
-        return `${base}/${version}`;
+        // Ensure proper /api/{version} base path matching langtrain-server mounting
+        const base = this.settings.apiBaseUrl.replace(/\/+$/, "");
+        if (base.endsWith(`/api/${version}`)) return base;
+        if (base.endsWith(`/${version}`)) return base;
+        if (base.endsWith('/api')) return `${base}/${version}`;
+        return `${base}/api/${version}`;
     }
 
     public save(newSettings: Partial<AppSettings>): void {

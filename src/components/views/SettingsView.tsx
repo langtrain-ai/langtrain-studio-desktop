@@ -3,7 +3,7 @@
  * Configure workspace settings
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Settings,
     User,
@@ -13,13 +13,15 @@ import {
     Server,
     HardDrive,
     Shield,
-    ExternalLink,
     Copy,
     Check,
     Moon,
     Sun,
     Monitor
 } from 'lucide-react';
+import { useAuth } from '../../services/auth';
+import { settings } from '../../lib/settings';
+import { secureStorage } from '../../lib/storage';
 import './SettingsView.css';
 
 type SettingsTab = 'profile' | 'api' | 'notifications' | 'appearance' | 'storage' | 'privacy';
@@ -45,13 +47,29 @@ function TabButton({ id, label, icon, active, onClick }: TabButtonProps) {
 }
 
 function ProfileSettings() {
-    const [name, setName] = useState('John Doe');
-    const [email, setEmail] = useState('john@example.com');
+    const { user, isAuthenticated } = useAuth();
+    const [name, setName] = useState(user?.name || '');
+    const [email, setEmail] = useState(user?.email || '');
+    const [saved, setSaved] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            setName(user.name || '');
+            setEmail(user.email || '');
+        }
+    }, [user]);
+
+    const handleSave = () => {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+    };
 
     return (
         <div className="settings-section">
             <h2>Profile Settings</h2>
-            <p className="settings-description">Manage your account information</p>
+            <p className="settings-description">
+                {isAuthenticated ? `Signed in as ${user?.email}` : 'Manage your workspace profile'}
+            </p>
 
             <div className="settings-form">
                 <div className="form-group">
@@ -70,55 +88,109 @@ function ProfileSettings() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your@email.com"
+                        disabled={isAuthenticated}
                     />
                 </div>
-                <button className="button button--primary">Save Changes</button>
+                <button className="button button--primary" onClick={handleSave}>
+                    {saved ? 'Saved ✓' : 'Save Changes'}
+                </button>
             </div>
         </div>
     );
 }
 
 function APISettings() {
-    const [apiKey] = useState('lt_sk_1234567890abcdefghijklmnop');
+    const token = secureStorage.getItem('langtrain_auth_token') || '';
     const [copied, setCopied] = useState(false);
+    const [baseUrl, setBaseUrl] = useState(settings.get().apiBaseUrl);
+    const [savedEndpoint, setSavedEndpoint] = useState(false);
 
     function handleCopy() {
-        navigator.clipboard.writeText(apiKey);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        if (token) {
+            navigator.clipboard.writeText(token);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    }
+
+    function handleSaveEndpoint() {
+        settings.save({ apiBaseUrl: baseUrl.trim() });
+        setSavedEndpoint(true);
+        setTimeout(() => setSavedEndpoint(false), 2000);
     }
 
     return (
         <div className="settings-section">
             <h2>API Settings</h2>
-            <p className="settings-description">Manage your API keys and endpoints</p>
+            <p className="settings-description">Manage your API credentials and service endpoints</p>
 
             <div className="settings-card">
                 <div className="settings-card__header">
                     <Key size={16} />
-                    <span>API Key</span>
+                    <span>Active Session / API Token</span>
                 </div>
                 <div className="api-key-display">
-                    <code>{apiKey.slice(0, 20)}••••••••</code>
-                    <button className="icon-button" onClick={handleCopy}>
-                        {copied ? <Check size={14} /> : <Copy size={14} />}
-                    </button>
+                    <code>{token ? `${token.slice(0, 16)}••••••••` : 'Not authenticated — log in via Authenticator'}</code>
+                    {token && (
+                        <button className="icon-button" onClick={handleCopy} title="Copy token">
+                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                    )}
                 </div>
-                <p className="settings-hint">Keep this key secret. Regenerating will invalidate the old key.</p>
-                <button className="button button--secondary">Regenerate Key</button>
+                <p className="settings-hint">Used for authenticating Studio requests to the Langtrain backend.</p>
             </div>
 
             <div className="settings-card">
                 <div className="settings-card__header">
                     <Server size={16} />
-                    <span>API Endpoint</span>
+                    <span>Backend API Base URL</span>
                 </div>
-                <div className="api-endpoint-display">
-                    <code>https://api.langtrain.xyz/v1</code>
-                    <button className="icon-button">
-                        <ExternalLink size={14} />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px', alignItems: 'center' }}>
+                    <input
+                        type="text"
+                        value={baseUrl}
+                        onChange={(e) => setBaseUrl(e.target.value)}
+                        placeholder="https://api.langtrain.xyz"
+                        style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            background: 'var(--bg-secondary)',
+                            border: '1px solid var(--border-color)',
+                            color: 'var(--text-primary)',
+                            fontFamily: 'monospace',
+                            fontSize: '13px'
+                        }}
+                    />
+                    <button className="button button--secondary" onClick={handleSaveEndpoint}>
+                        {savedEndpoint ? 'Saved ✓' : 'Save'}
                     </button>
                 </div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                    <button
+                        className="button button--ghost"
+                        style={{ fontSize: '11px', padding: '4px 8px' }}
+                        onClick={() => {
+                            setBaseUrl('https://api.langtrain.xyz');
+                            settings.save({ apiBaseUrl: 'https://api.langtrain.xyz' });
+                        }}
+                    >
+                        Production (Cloud)
+                    </button>
+                    <button
+                        className="button button--ghost"
+                        style={{ fontSize: '11px', padding: '4px 8px' }}
+                        onClick={() => {
+                            setBaseUrl('http://localhost:8000');
+                            settings.save({ apiBaseUrl: 'http://localhost:8000' });
+                        }}
+                    >
+                        Local Server (:8000)
+                    </button>
+                </div>
+                <p className="settings-hint" style={{ marginTop: '10px' }}>
+                    Resolved API target: <code>{settings.getApiUrl()}</code>
+                </p>
             </div>
         </div>
     );

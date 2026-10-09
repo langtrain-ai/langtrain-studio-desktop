@@ -3,203 +3,119 @@
 <div align="center">
   <img src="public/langtrain-app-logo.svg" alt="Langtrain Logo" width="128" height="128">
   
-  **The desktop companion for [Langtrain](https://www.langtrain.xyz) - AI Fine-tuning Made Simple**
+  **The unified desktop studio for [Langtrain](https://langtrain.xyz) — Autonomous Agents, LLM Fine-Tuning, and Serving**
   
   [![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?logo=tauri)](https://tauri.app)
   [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://typescriptlang.org)
-  [![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE)
+  [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite)](https://vitejs.dev)
+  [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 </div>
 
 ---
 
 ## Overview
 
-Langtrain Studio is a cross-platform desktop application for managing AI model fine-tuning workflows. Built with Tauri for native performance, it provides a seamless experience for:
+**Langtrain Studio** is a cross-platform desktop application designed for AI engineers building, aligning, fine-tuning, and serving LLMs and autonomous agents. Built with Tauri 2.0 and React 19, it gives you native desktop speed (~50MB RAM footprint) and complete control over local and cloud workflows.
 
-- 🎯 **Fine-tuning Jobs** - Create, monitor, and manage training runs
-- 📊 **Analytics** - Real-time metrics and usage insights
-- 📁 **Datasets** - Upload and manage training datasets
-- 🤖 **Models** - Browse and download base models
-- ⚙️ **Settings** - Configure API keys, preferences, and more
+- 🤖 **Autonomous Agents** — Create, configure, monitor, and interact with agent workflows
+- 📁 **Datasets & Curation** — Ingest raw data, auto-detect schemas, and convert to training-ready JSONL
+- 🎯 **Fine-Tuning Jobs** — Configure and monitor QLoRA, LoRA, DPO, and full training runs locally or on cloud GPUs
+- 🚀 **vLLM Serving** — Spin up optimized inference engines with real-time token streaming
+- 📊 **Analytics & Telemetry** — Monitor token throughput, cost estimation, and job completion metrics
+- 💾 **Local & Offline Models** — Connect to local Ollama / LM Studio or local weight checkouts
+- ⚙️ **Configurable Endpoints** — Switch seamlessly between Cloud (`api.langtrain.xyz`) and local dev servers (`localhost:8000`)
 
-## Screenshots
+---
 
-| Dashboard | Training | Analytics |
-|-----------|----------|-----------|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Training](docs/screenshots/training.png) | ![Analytics](docs/screenshots/analytics.png) |
+## Views & Capabilities
 
-## Features
+| View | Description |
+|---|---|
+| **Overview** | System summary, active agents, running fine-tuning jobs, and GPU utilization |
+| **Agents** | Multi-agent runtime configuration, tool permissions, and interactive execution |
+| **Projects** | Workspace organization for datasets, models, and run configurations |
+| **Datasets** | Dataset upload, validation, row inspection, and Hugging Face import |
+| **Data Curation** | Pattern detection, column mapping, and automated JSONL conversion |
+| **Model Registry** | Curated catalog of open weights (Llama 3.1/3.2, Mistral, Qwen, DeepSeek) |
+| **vLLM Serve** | Local and remote model serving with OpenAI-compatible API endpoints |
+| **Tuning Jobs** | Real-time training loss graphs, evaluation metrics, and checkpoint exports |
+| **Analytics** | Token consumption, historical spend, and job latency telemetry |
+| **Local Models** | On-device model discovery via Ollama/LM Studio and local runners |
+| **Settings** | Live authentication tokens, customizable backend endpoints, and theme management |
 
-### Core Functionality
-- **TOTP Authentication** - Secure 2FA login with authenticator apps
-- **Real-time Monitoring** - Live training metrics and logs
-- **Cross-platform** - Native apps for Windows and Linux (macOS via Swift app)
-- **Offline Support** - Works offline with local model training
-- **Cloud Sync** - Seamless sync with Langtrain cloud infrastructure
+---
 
-### Technical Highlights
-- **Native Performance** - Built with Rust/Tauri, uses only ~50MB RAM
-- **Secure Storage** - Credentials stored in system keychain
-- **Modern UI** - Premium dark theme with smooth animations
-- **API Integration** - Full access to Langtrain API endpoints
+## Quick Start
 
-## Installation
+### Prerequisites
+- [Node.js](https://nodejs.org/) 20+
+- [pnpm](https://pnpm.io/) 10+
+- [Rust](https://rustup.rs/) 1.75+ (for Tauri builds)
+- Platform-specific build tools:
+  - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
+  - **Linux**: `libwebkit2gtk-4.1-dev`, `libssl-dev`, `libgtk-3-dev`, `build-essential`
+  - **Windows**: Visual Studio 2022 C++ Build Tools
 
-### Pre-built Binaries
-
-Download the latest release for your platform:
-
-| Platform | Download |
-|----------|----------|
-| Windows (64-bit) | [Langtrain-Studio-Setup.exe](https://github.com/langtrain-ai/langtrain_studio_desktop/releases) |
-| Linux (AppImage) | [Langtrain-Studio.AppImage](https://github.com/langtrain-ai/langtrain_studio_desktop/releases) |
-| Linux (Debian) | [langtrain-studio.deb](https://github.com/langtrain-ai/langtrain_studio_desktop/releases) |
-
-> **macOS Users**: Please download the native Swift app from [langtrain-studio](https://github.com/langtrain-ai/langtrain_studio/releases) for the best experience on Apple Silicon and Intel Macs.
-
-
-### Build from Source
-
-#### Prerequisites
-
-- [Node.js](https://nodejs.org/) 18+
-- [Rust](https://rustup.rs/) 1.70+
-- Platform-specific dependencies:
-  - **Windows**: Visual Studio Build Tools
-  - **Linux**: `libwebkit2gtk-4.1-dev`, `libssl-dev`, `libgtk-3-dev`
-
-#### Steps
+### Running the App
 
 ```bash
 # Clone the repository
 git clone https://github.com/langtrain-ai/langtrain_studio_desktop.git
-cd langtrain-studio-desktop
+cd langtrain_studio_desktop
 
 # Install dependencies
-npm install
+pnpm install
 
-# Run in development mode
-npm run tauri dev
+# Run the frontend Vite dev server (browser preview)
+pnpm dev
 
-# Build for production
-npm run tauri build
+# Run inside the native Tauri desktop shell
+pnpm tauri dev
+
+# Build production desktop binaries
+pnpm tauri build
 ```
-
-## Development
-
-### Project Structure
-
-```
-langtrain-studio-desktop/
-├── src/                    # React frontend
-│   ├── components/
-│   │   ├── layout/        # MainLayout, Sidebar
-│   │   └── views/         # Page components
-│   ├── services/          # API & Auth services
-│   ├── lib/               # Utilities & theme
-│   └── styles/            # Global CSS
-├── src-tauri/             # Rust backend
-│   ├── src/               # Rust source
-│   └── icons/             # App icons
-└── public/                # Static assets
-```
-
-### Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Build React frontend |
-| `npm run tauri dev` | Run Tauri in development |
-| `npm run tauri build` | Build production bundle |
-| `npm run preview` | Preview production build |
-
-### Environment Configuration
-
-The app connects to:
-- **API**: `https://api.langtrain.xyz`
-- **Auth**: `https://www.langtrain.xyz/api/auth`
-
-For local development with a custom backend:
-```typescript
-// src/services/api.ts
-export const API_CONFIG = {
-    baseURL: 'http://localhost:8000',  // Local backend
-    webURL: 'http://localhost:3000',   // Local web
-};
-```
-
-## Architecture
-
-### Frontend (React)
-
-- **State Management**: React hooks + AuthManager singleton
-- **Routing**: React Router DOM v7
-- **Styling**: CSS Modules with CSS variables
-- **Icons**: Lucide React
-
-### Backend (Tauri/Rust)
-
-- **Window Management**: Native window controls
-- **Storage**: Plugin-based secure storage
-- **Shell**: URL opening and external commands
-
-### API Integration
-
-```typescript
-import { apiClient } from './services/api';
-
-// List fine-tuning jobs
-const jobs = await apiClient.listFineTuningJobs();
-
-// Create a new job
-await apiClient.createFineTuningJob({
-  datasetId: 'ds-123',
-  baseModel: 'llama-3-8b',
-  trainingMethod: 'qlora',
-});
-```
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Run tests: `npm test`
-5. Commit: `git commit -m 'Add amazing feature'`
-6. Push: `git push origin feature/amazing-feature`
-7. Open a Pull Request
-
-## Roadmap
-
-- [ ] Command palette (⌘K)
-- [ ] Keyboard shortcuts
-- [ ] Light/Dark theme toggle
-- [ ] Real-time job notifications
-- [ ] Local model training (MLX/GGML)
-- [ ] Model export to ONNX
-
-## Support
-
-- 📖 [Documentation](https://www.langtrain.xyz/docs)
-- 💬 [Discord Community](https://discord.gg/langtrain)
-- 📧 [Email Support](mailto:support@langtrain.xyz)
-- 🐛 [Issue Tracker](https://github.com/langtrain-ai/langtrain_studio_desktop/issues)
-
-## License
-
-Copyright © 2024 Langtrain AI Private Limited. All rights reserved.
-
-This software is proprietary and confidential. Unauthorized copying, modification,
-distribution, or use of this software is strictly prohibited.
 
 ---
 
-<div align="center">
-  Built with ❤️ by the <a href="https://www.langtrain.xyz">Langtrain</a> team
-</div>
+## Configuration & Environments
+
+Langtrain Studio supports both cloud infrastructure and self-hosted environments:
+
+1. **Cloud Production** (default):
+   - **Backend API**: `https://api.langtrain.xyz` (auto-routes through `/api/v1`)
+   - **Web / Auth**: `https://app.langtrain.xyz` and `https://auth.langtrain.xyz`
+2. **Local Self-Hosted**:
+   - Navigate to **Settings → API Settings** in the app.
+   - Click **Local Server (:8000)** or enter `http://localhost:8000`.
+   - The app immediately updates its target to `http://localhost:8000/api/v1`.
+
+---
+
+## Architecture
+
+```
+langtrain_studio_desktop/
+├── src/
+│   ├── components/
+│   │   ├── layout/            # Sidebar, Topbar, Window Frame
+│   │   ├── views/             # AgentsView, DatasetsView, TrainingView, SettingsView, etc.
+│   │   └── common/            # Reusable buttons, cards, modals, tables
+│   ├── services/
+│   │   ├── api.ts             # Unified API client matching langtrain-server /api/v1
+│   │   ├── auth.ts            # TOTP & session authentication manager
+│   │   └── local.ts           # Ollama / LM Studio discovery and local inference
+│   ├── lib/
+│   │   ├── settings.ts        # SettingsManager with reactive endpoint switching
+│   │   ├── storage.ts         # Secure local storage wrapper
+│   │   └── tokens/            # Design tokens (colors, typography, navigation)
+│   └── main.tsx               # App bootstrapper
+└── src-tauri/                 # Rust Tauri shell configuration & native window handlers
+```
+
+---
+
+## License
+
+MIT © [Langtrain AI](https://langtrain.xyz)
